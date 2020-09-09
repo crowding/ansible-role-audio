@@ -1,68 +1,41 @@
----
-- hosts: sound
-  tasks:
-    - name: configure udev
-      become: yes
-      template:
-        src: templates/audio_udev_rules.j2
-        dest: /etc/udev/rules.d/39-audio.rules
-      notify: "reload udev rules"
-    - name: install packages
-      become: yes
-      apt: 
-        name:
-        - avahi-daemon
-        - pulseaudio-module-zeroconf
-        # - pulse-audio-x11
-        - shairport-sync
-        state: present
-    - name: asound conf
-      become: yes
-      template:
-        src: templates/audio_asound_conf.j2
-        dest: /etc/asound.conf
-    - name: write pulseaudio daemon.conf
-      become: yes
-      template:
-        src: templates/pulseaudio_daemon_conf.j2
-        dest: /etc/pulse/daemon.conf
-      notify: "restart pulseaudio"
-    - name: write pulseaudio default.pa
-      become: yes
-      template:
-        src: templates/pulse_default.pa.j2
-        dest: /etc/pulse/default.pa
-      notify: "restart pulseaudio"
-    - name: configure shairport-sync
-      become: yes
-      template:
-        src: templates/audio_shairport_default.j2
-        dest: "/etc/default/shairport-sync"
-      #notify: "restart shairport"
-
-  handlers:
-    - name: restart avahi-daemon
-      service: name=avahi-daemon state=restarted
-    - name: check if pulseaudio running
-      command: pulseaudio --check
-      register: pa_running
-      ignore_errors: yes
-      listen: "restart pulseaudio"
-    - name: "kill pulseaudio"
-      command: pulseaudio -k
-      when: pa_running is succeeded
-      listen: "restart pulseaudio"
-    - name: "restart pulseaudio daemon"
-      command: pulseaudio -v -D
-      listen: "restart pulseaudio"
-    - name: "reload udev rules"
-      become: yes
-      command: udevadm control --reload-rules
-      listen: "reload udev rules"
-    - name: "udev trigger"
-      become: yes
-      command: udevadm trigger
-      listen: "reload udev rules"
+- name: configure udev
+  become: yes
+  template:
+    src: udev_rules.j2
+    dest: /etc/udev/rules.d/39-audio.rules
+  notify: "reload udev rules"
+- name: install packages
+  become: yes
+  apt: 
+    name:
+    - avahi-daemon
+    - pulseaudio-module-zeroconf
+    # - pulse-audio-x11
+    - shairport-sync
+    state: present
+- name: asound conf
+  become: yes
+  template:
+    src: asound_conf.j2
+    dest: /etc/asound.conf
+- name: write pulseaudio daemon.conf
+  become: yes
+  template:
+    src: pulseaudio_daemon_conf.j2
+    dest: /etc/pulse/daemon.conf
+  notify: "restart pulseaudio"
+- name: write pulseaudio default.pa
+  become: yes
+  template:
+    src: pulse_default.pa.j2
+    dest: /etc/pulse/default.pa
+  notify: "restart pulseaudio"
+- name: configure shairport-sync
+  become: yes
+  template:
+    src: shairport_default.j2
+    dest: "/etc/default/shairport-sync"
+  #notify: "restart shairport"
 
 # Allegedly, using pulseaudio as a global server is bad:
 # https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/WhatIsWrongWithSystemWide/
