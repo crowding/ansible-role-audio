@@ -1,0 +1,17 @@
+pulse_daemon_conf:
+  high-priority: no
+  nice-level: -1
+  realtime-scheduling: yes
+  realtime-priority: 5
+  flat-volumes: no
+  resample-method: speex-float-1
+  default-sample-rate: 48000
+  deferred-volume-safety-margin-usec: 10
+
+pulse_default_pa:
+  - command: load-module
+    name: "module-native-protocol-tcp"
+    args: "auth-ip-acl=127.0.0.1;10.0.0.0/24 auth-anonymous=1"
+  - command: load-module
+    name: "module-zeroconf-publish"
+    args: ""

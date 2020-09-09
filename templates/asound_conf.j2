@@ -1,0 +1,31 @@
+{% for card in cards %}
+pcm.{{card.name}} {
+   type dmix
+   ipc_key {{2048 + loop.index0}}
+   slave { pcm { type hw; card {{card.name}}; rate 48000 }; channels {{ 2 * card.outputs|length }} }
+   
+}
+
+{% for output in card.outputs %}
+pcm.{{output}} {
+  type plug
+  slave {
+    pcm {
+      type plug
+      slave { pcm {{card.name}} }
+      ttable.0.{{loop.index0 * 2}} 1
+      ttable.1.{{loop.index0 * 2 + 1}} 1
+    }
+    channels 2
+  }
+  route_policy default
+}
+
+ctl.{{output}} { type hw; card {{card.name}} }
+
+{% endfor %}
+{% endfor %}
+
+pcm.!default { type plug; pcm {{cards[0].outputs[0]}} }
+
+ctl.!default { type plug; pcm {{cards[0].outputs[0]}} }

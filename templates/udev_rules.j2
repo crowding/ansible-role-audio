@@ -1,0 +1,8 @@
+SUBSYSTEM!="sound", GOTO="sound_end"
+ACTION!="add", GOTO="sound_end"
+
+{% for out in cards %}
+DEVPATH=="{{ out.devpath }}", ATTR{id}="{{ out.name }}"
+{% endfor %}
+
+LABEL="sound_end"
