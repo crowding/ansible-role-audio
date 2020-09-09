@@ -21,20 +21,20 @@
 .fail
 
 ### Automatically restore the volume of streams and devices
-load-module module-device-restore
-load-module module-stream-restore
-load-module module-card-restore
+# load-module module-device-restore
+# load-module module-stream-restore
+# load-module module-card-restore
 
 ### Automatically augment property information from .desktop files
 ### stored in /usr/share/application
 load-module module-augment-properties
 
 ### Should be after module-*-restore but before module-*-detect
-load-module module-switch-on-port-available
+# load-module module-switch-on-port-available
 
 ### Use hot-plugged devices like Bluetooth or USB automatically (LP: #1702794)
 .ifexists module-switch-on-connect.so
-load-module module-switch-on-connect
+# load-module module-switch-on-connect
 .endif
 
 ### Load audio drivers statically
@@ -54,6 +54,9 @@ load-module module-alsa-sink device={{card.name}} tsched=0
 {% for output in card.outputs %}
 load-module module-remap-sink sink_name={{output}} sink_properties="device.description='{{output}}'" remix=no master=alsa_output.{{card.name}} channels=2 channel_map=front-left,front-right master_channel_map={{
 ['front-left','front-right','rear-left','rear-right','front-center','lfe','side-left','side-right'][loop.index0 * 2]}},{{['front-left','front-right','rear-left','rear-right','front-center','lfe','side-left','side-right'][loop.index0 * 2 + 1]}}
+{% if card == cards[0] and output == cards[0].outputs[0] %}
+set-default-sink {{cards[0].outputs[0]}}
+{% endif %}
 {% endfor %}
 {% endfor %}
 
@@ -119,7 +122,7 @@ load-module module-gsettings
 ### during runtime
 ### NOTE: This should be loaded as early as possible so that subsequent modules
 ### that look up the default sink/source get the right value
-load-module module-default-device-restore
+# load-module module-default-device-restore
 
 ### Make sure we always have a sink around, even if it is a null sink.
 load-module module-always-sink
@@ -159,5 +162,4 @@ load-module module-filter-heuristics
 load-module module-filter-apply
 
 ### Make some devices default
-set-default-sink {{cards[0].outputs[0]}}
-#set-default-source input
+# set-default-source input

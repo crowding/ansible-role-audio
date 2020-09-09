@@ -2,7 +2,7 @@
 pcm.{{card.name}} {
    type dmix
    ipc_key {{2048 + loop.index0}}
-   slave { pcm { type hw; card {{card.name}}; rate 48000 }; channels {{ 2 * card.outputs|length }} }
+   slave { pcm { type hw; card {{card.name}}; rate {{sample_rate}} }; channels {{ 2 * card.outputs|length }} }
    
 }
 

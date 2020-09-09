@@ -1,0 +1,22 @@
+- name: restart avahi-daemon
+  service: name=avahi-daemon state=restarted
+- name: check if pulseaudio running
+  command: pulseaudio --check
+  register: pa_running
+  ignore_errors: yes
+  listen: "restart pulseaudio"
+- name: "kill pulseaudio"
+  command: pulseaudio -k
+  when: pa_running is succeeded
+  listen: "restart pulseaudio"
+- name: "restart pulseaudio daemon"
+  command: pulseaudio -v -D
+  listen: "restart pulseaudio"
+- name: "reload udev rules"
+  become: yes
+  command: udevadm control --reload-rules
+  listen: "reload udev rules"
+- name: "udev trigger"
+  become: yes
+  command: udevadm trigger
+  listen: "reload udev rules"
