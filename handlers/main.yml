@@ -20,3 +20,22 @@
   become: yes
   command: udevadm trigger
   listen: "reload udev rules"
+- name: "stop shairport"
+  become: yes
+  systemd:
+    name: "shairport-sync.target"
+    state: stopped
+  listen: "reload systemd"
+- name: "reload systemd"
+  become: yes
+  systemd:
+    daemon_reload: yes
+  listen: "reload systemd"
+- name: "start shairport"
+  become: yes
+  systemd:
+    name: "shairport-sync.target"
+    state: restarted
+  listen:
+    - "restart shairport"
+    - "reload systemd"

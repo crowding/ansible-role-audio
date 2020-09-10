@@ -12,6 +12,7 @@
     - pulseaudio-module-zeroconf
     # - pulse-audio-x11
     - shairport-sync
+    - pulsemixer
     state: present
 - name: asound conf
   become: yes
@@ -30,12 +31,38 @@
     src: pulse_default.pa.j2
     dest: /etc/pulse/default.pa
   notify: "restart pulseaudio"
+- name: disable single shairport
+  become: yes
+  systemd:
+    name: "shairport-sync"
+    state: stopped
+    enabled: no
 - name: configure shairport-sync
   become: yes
   template:
     src: shairport_default.j2
     dest: "/etc/default/shairport-sync"
-  #notify: "restart shairport"
+  notify: "restart shairport"
+- name: make shairport systemd worker
+  become: yes
+  copy:
+    src: "shairport-sync@.service"
+    dest: "/lib/systemd/system/shairport-sync@.service"
+  notify: "reload systemd"
+- name: make shairport target item
+  become: yes
+  template:
+    src: "shairport-sync.target.j2"
+    dest: "/etc/systemd/system/shairport-sync.target"
+  notify: "reload systemd"
+- meta: flush_handlers
+- name: enable multi shairport
+  become: yes
+  systemd:
+    name: "shairport-sync.target"
+    enabled: yes
+    state: started
+    
 
 # Allegedly, using pulseaudio as a global server is bad:
 # https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/WhatIsWrongWithSystemWide/

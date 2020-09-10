@@ -221,19 +221,12 @@ mpg123 -o alsa -a lab avril.mp3
 mpg123 -o alsa -a lab avril_14th.mp3
 ```
 
-The second command means to play to the "surround51" device on the card ID
-"living_room."
-
 ## Configuring virtual devices in asound.conf
 
 We may also want to configure some virtual devices via ALSA. One
 example of a virtual device might be to output just the rear or center/sub
 channel of the 5.1 decoder. Another example of a virtual device might
 be one virtual device that outputs to multiple physical devices.
-
-Here's an example of how to split the output of a surround card in `asound.conf`:
-
-This creates targets "front5", "center5" and "rear5" virtual targets that each can accept a stereo signal.
 
 ### Splitting a surround sound device into virtual 2-channel devices
 
@@ -309,14 +302,15 @@ ctl.laundry { type hw; card surround5 }
 Writing the asound.conf gets quite repetitive so I plan to
 template it out from Ansible.
 
-### Playing simultaneously to multiple outputs (but see below)
+### <a name="multiple"></a>Playing simultaneously to multiple outputs using ALSA (but see below)
 
 ALSA has the ability to gang virtual devices together, but I won't be
 using it.  The reason is because of clock skew -- generally, each
-sound card will have its own clock. There are some exceptions, wlike
-the chips used in the Griffin iMic, which sync their clocks to the USB
-bus. If you have synched sound outputs, here's how you'd set up
-virtual multiple output targets:
+sound card will have its own clock, and two clocks will slowly drift
+apart over time.  There are some exceptions, wlike the chips used in
+the Griffin iMic, which sync their clocks to the USB bus. If you have
+synched sound outputs, here's how you'd set up virtual multiple output
+targets:
 
 ```
  # -- output the same stereo signal to two outputs each of both
@@ -340,7 +334,8 @@ pcm.gang1 {
 }
 ```
 
-Note that this can also be done using our existing PCM definitions as:
+Note that this can also be done using our existing named PCM
+definitions as:
 
 ```
 pcm.gang2 {
@@ -357,8 +352,16 @@ pcm.gang2 {
 }
 ```
 
-But this form seems to cause a substantial start-up delay, and probably
+But this form seemed to cause a substantial start-up delay, and probably
 more CPU overhead.
+
+### Relaying to Pulse
+
+Instead, we relay the output from ALSA to PulseAudio, (which will send
+its data back to ALSA, in the present configuration, but that's
+neither here nor there. Do this using the alsa pulse plugin, for example:
+
+    pcm.everywhere { type pulse; device "everywhere" }
 
 # Installing Pulse
 
@@ -470,7 +473,7 @@ setup in one line like this:
 Once I spelled everything right, this actually does start to work a
 bit better than the ALSA.
 
-## Virtual sink to the garage?
+## [TODO] Virtual sink to the garage?
 
 In the garage, which isn't physically wired to the rest of the house,
 I have an Apple Airport Express -- an ancient one that
@@ -506,33 +509,114 @@ have web interfaces to a volume control.
 
 https://github.com/Siot/PaWebControl
 
-
-
 # Network audio servers
 
 ## Airplay via shairport-sync
 
+To serve with the Airplay protocol, I
+installed the `shairport-sync` package. I will be running one instance
+of this per endpoint, which require modifying the init script to start
+multiple instances.
+
     apt-get install sharport-sync
+
+### over ALSA
 
 Run a small instance of shairport-sync with, e.g.:
 
-    shairport-sync -m alsa -a lab -p 5000
+    shairport-sync -o alsa -a lab -p 5000 -- -d lab
 
-This... gives output on the wrong channel. And it's short bursts and
-pops of audio rather than the whole thing.
+#### low volume?
 
-Also, I don't know how to specify the output device. The shairport has a 
+At first this appeared to play nothing, but I found it is actually
+playing very softly.
 
-To serve with the Airplay protocol, I installed the `shairport-sync`
-package. I will be running one instance of this per endpoint, which
-require modifying the init script to start multiple instances.
+This problem went away, not sure why. Running pulsemixer? A fix in
+ctl block in alsamixer?
 
-I did this by adding some definitions to `/etc/default/shairport_sync`
-to define an array of daemon arguments, starting one daemon for each.
+#### forwarding virtual outputs from ALSA to Pulse
+
+If I use ALSA, this will require driving the virtual multiple outputs
+from ALSA. I had [earlier][#multiple] decided to create the virtual
+outputs using Pulse, which is capable of correcting for clock skew. I
+instead opted to crewate shadow virtual devices that pipe from ALSA to
+Pulse, which handles synchronization between devices better, and then
+sends back to ALSA. See [above][#relaying-to-pulse].
+
+### over Pulse
+
+Meanwhile if I try running it over Pulse, as in `shairport-sync -o pa ...`
+it appears to connect and play, but nothing is coming out the speakers
+when playing from my mac. There is a Github post alleging that
+shairport-sync and pulse don't play well. But I earlier chose to skip
+over ALSA when creating multiple outputs. A workaround might be to
+create virtual outputs in ALSA that redirect to Pulse.
 
 There is a question of whether to make Shairport use ALSA directly or
-layer on top of Pulse.
+layer it on top of Pulse. So far it seems to work better with ALSA.
+
+### running shairport-sync as a service
+
+Having determined arguments that `shairport_sync` worked with,
+I placed the desired arguments in `/etc/default/shairport_sync`:
+
+    DAEMON_ARGS="-o alsa -a lab -p 5000 -- -d lab"
+
+
+### running several instances of shairport-sync as a service.
+
+#### don't use init.d
+
+I tried modifying `/etc/init.d/shairport-sync` but I could not even
+figure out how to even emit log messages from it. I think init.d
+scripts are actually deprecated these days and are being redirected to
+another mechanism. You actually need to go look in
+`/lib/systemd/system/shairport-sync.service`.
+
+#### make sure to --purge
+
+BTW. After messing up the files in `/etc/init.d` and `/etc/default`
+associated with the `shairport-sync` package, I found that if I merely
+`apt-get remove --purge` it doesn't remove those files. And if I
+delete them manually, the files are not replaced when you delete a
+file "owned" by a package, it will not be replaced when you reinstall
+the package, unless you --purge the package. How weird is that?
+
+#### running multiple instances using a template service.
+
+Turns out systemd has a way to handle multiple instances, by defining
+a [template service][].
+
+[template service]: https://www.stevenrombauts.be/2019/01/run-multiple-instances-of-the-same-systemd-unit/
+
+I implemented this by first defining an array of arguments in
+`/etc/default/shairport_sync`. I created a file
+`/etc/systemd/system/shairport-sync@.service` which was a copy of the original
+file. The `@` at the end means systemd treats it as a template, so
+that when you run
+
+    systemctl daemon-reload 
+    systemctl start shairport-sync@cave
+
+then `cave` will be substituted for each `%i` in the template.
+
+    ...
+    Description=ShairportSync AirTunes receiver on %i
+    ExecStart=/usr/bin/shairport-sync DAEMON_ARGS_%i
+    ...
+
+The next problem is to pass each instance's arguments. I created
+separate variables in `/etc/default/shairport-sync` for this. Then I
+created a master service that controlled all the instances, in a file
+`/etc/systemd/system/shairport-sync.target`
+
+## Miracast
+
+I believe the nearest Windows/Android/Linux equiavlent to Airplay is
+Miracast. So let's see if we can set that one up too. There's
+[MiracleCast][] which might be for doing screencasting? for just
+audio, there's
 
 
 
-# Miracast
+[miraclecast]: https://github.com/albfan/miraclecast
