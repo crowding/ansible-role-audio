@@ -16,5 +16,13 @@ pulse_default_pa:
     name: "module-native-protocol-tcp"
     args: "auth-ip-acl=127.0.0.1;10.0.0.0/24 auth-anonymous=1"
   - command: load-module
+    name: "module-native-protocol-unix"
+    args: "auth_group=audio socket=/tmp/pulse-server"
+  - command: load-module
     name: "module-zeroconf-publish"
     args: ""
+
+pulse_client_conf:
+  autospawn: "no"
+  default-server: "unix:/tmp/pulse-server"
+  enable-memfd: "yes"

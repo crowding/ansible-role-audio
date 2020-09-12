@@ -4,14 +4,21 @@
   command: pulseaudio --check
   register: pa_running
   ignore_errors: yes
-  listen: "restart pulseaudio"
+  listen:
+    - "stop pulseaudio"
+    - "restart pulseaudio"
 - name: "kill pulseaudio"
   command: pulseaudio -k
   when: pa_running is succeeded
-  listen: "restart pulseaudio"
+  listen:
+    - "stop pulseaudio"
+    - "restart pulseaudio"
+    - "reload alsa"
 - name: "restart pulseaudio daemon"
   command: pulseaudio -v -D
-  listen: "restart pulseaudio"
+  listen:
+    - "restart pulseaudio"
+    - "reload alsa"
 - name: "reload udev rules"
   become: yes
   command: udevadm control --reload-rules
@@ -39,3 +46,4 @@
   listen:
     - "restart shairport"
     - "reload systemd"
+    - "reload alsa"

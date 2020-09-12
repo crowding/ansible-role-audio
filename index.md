@@ -11,20 +11,22 @@ footer: true
 
 ## Or, how to run a bunch of USB audio DACs at once and serve them over the network
 
-This is a revamp of my earlier setup, but with a newer Orange Pi board.
+This is a revamp of my earlier setup, but with a newer Orange Pi Plus
+2E board. I picked that board on the basis of having both onboard
+flash and a lot more USB bandwidth than the Raspberry Pi.
 
 I want to be able to stream music from any mobile device (laptop,
-iDevice, Android-, guest's phones) to any room in the house. I also
-want to be able to take the podcast I'm listening to upstairs and
+iDevice, Android, guest's phones) to any room in the house. I also
+want to be able to take the content I'm listening to upstairs and
 move it downstairs, or to other rooms as I move around.
 
 I also want to be able to connect my Bluetooth headphones to it, and
 have audio routed there automatically, and be able to walk around the
-property (so a long range transmitter)
+property (so a long range transmitter, or streaming on my phone)
 
 This should also support me wandering all the way around with my
-headphones. (perhaps I should be able to connect my phone as a client to the
-stream?)
+headphones. (perhaps I should be able to connect my phone as a client
+to the stream?)
 
 I might wish there to be a web management console to connect the streams.
 
@@ -32,7 +34,7 @@ Now, there are already tutorials for multiroom audio on the Raspi, but
 they require you to have a Raspi for each endpoint. My house's layout
 is such that you can reach almost every room from a location near the
 furnace, so it makes a lot of sense to have one central server with
-several analog outpits. This wafes theexpense and config hassle.
+several analog outputs.
 
 This is also because the DACs that come on these devboards are all kind
 of crap.
@@ -473,6 +475,14 @@ setup in one line like this:
 Once I spelled everything right, this actually does start to work a
 bit better than the ALSA.
 
+## [TODO] running Pulse as a service?
+
+I would like Pulse to start at system load. Currently, it is started
+by the graphical desktop automatically. I tried changing this by
+setting `autospawn = no` in `/etc/pulse/client.conf`. 
+
+
+
 ## [TODO] Virtual sink to the garage?
 
 In the garage, which isn't physically wired to the rest of the house,
@@ -499,7 +509,8 @@ There ought be be some UI for connecting bluetooth devices, exposed on
 the web.
 
 Another way to do this might be to use a Bluetooth adapter that is a
-small sound card of its own.
+small sound card of its own, which I happen to have laying
+around. It's a bit of a bain to connect this one up though.
 
 ## Web control panel?
 
@@ -609,6 +620,24 @@ The next problem is to pass each instance's arguments. I created
 separate variables in `/etc/default/shairport-sync` for this. Then I
 created a master service that controlled all the instances, in a file
 `/etc/systemd/system/shairport-sync.target`
+
+This worked for all the direct ALSA ouputs -- but when it comes to the
+outputs configured to send from ALSA to Pulse, I get permissions
+errors:
+
+    Sep 10 05:31:11 localhost shairport-sync[30345]: ALSA lib pulse.c:242:(pulse_connect) PulseAudio: Unable to connect: Connection refused
+    Sep 10 05:31:11 localhost shairport-sync[30345]: alsa: error -111 ("Connection refused") opening alsa device "LR_K_O".
+
+This did not happen when running shairport-sync manually. This ay be
+because the service is running as the "shairport-sync" user while the
+daemon is running as my login user. It needs to have permissions to
+talk to pulseaudio as that user.
+
+I implemented the suggestions [here] to no effect. Perhaps the ALSA
+pulse plugin doesn't read pulse client.conf. How is ALSA trying to
+connect?
+
+-- [see above][#permissions].
 
 ## Miracast
 

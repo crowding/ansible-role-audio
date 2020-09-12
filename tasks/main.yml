@@ -19,12 +19,20 @@
   template:
     src: asound_conf.j2
     dest: /etc/asound.conf
+  notify:
+    - "reload alsa"
 - name: write pulseaudio daemon.conf
   become: yes
   template:
     src: pulseaudio_daemon_conf.j2
     dest: /etc/pulse/daemon.conf
   notify: "restart pulseaudio"
+- name: write pulseaudio client conf
+  become: yes
+  template:
+    src: pulseaudio_client.conf.j2
+    dest: /etc/pulse/client.conf
+  notify: "restart shairport"
 - name: write pulseaudio default.pa
   become: yes
   template:
@@ -43,6 +51,13 @@
     src: shairport_default.j2
     dest: "/etc/default/shairport-sync"
   notify: "restart shairport"
+- name: allow shairport to talk to pulse
+  become: yes
+  user:
+    name: "shairport-sync"
+    groups:
+      - "pulse-access"
+      - "audio"
 - name: make shairport systemd worker
   become: yes
   copy:

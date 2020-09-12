@@ -29,7 +29,6 @@ ctl.{{output}} { type hw; card {{card.name}} }
 {% for output in virtual_outputs %}
 pcm.{{output.name}} { type pulse; device {{ output.name }} }
 ctl.{{output.name}} { type pulse; device {{ output.name }} }
-
 {% endfor %}
 
 pcm.!default { type plug; pcm {{cards[0].outputs[0]}} }
