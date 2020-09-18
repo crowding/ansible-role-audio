@@ -1,0 +1,6 @@
+[Unit]
+Description=shairport-sync Workers
+Requires={% for card in cards %}{% for sink in card.outputs %} shairport-sync@{{sink}}.service{%endfor%}{%endfor%}{% for sink in virtual_outputs %} shairport-sync@{{sink.name}}.service{% endfor %}
+
+[Install]
+WantedBy=multi-user.target

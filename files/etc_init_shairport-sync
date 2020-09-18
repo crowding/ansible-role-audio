@@ -1,0 +1,42 @@
+#!/bin/bash
+# kFreeBSD do not accept scripts as interpreters, using #!/bin/sh and sourcing.
+if [ true != "$INIT_D_SCRIPT_SOURCED" ] ; then
+	set "$0" "$@"; INIT_D_SCRIPT_SOURCED=true . /lib/init/init-d-script
+fi
+### BEGIN INIT INFO
+# Provides:          shairport-sync
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      avahi-daemon
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Shairport Synchronous AirPlay
+# Description:       Implements a synchronous (multi-room-capable) AirPlay receiver
+### END INIT INFO
+
+# Author: Mike Brady <mikebrady@eircom.net>
+
+DESC="AirPlay Synchronous Audio Service"
+DAEMON=/usr/bin/shairport-sync
+PIDFILE=/run/shairport-sync/shairport-sync.pid
+USER=shairport-sync
+START_ARGS="--chuid ${USER}"
+
+
+do_start_prepare() {
+	# Make sure the PID directory exists and shairport-sync can write to it
+	piddir=$(dirname $PIDFILE)
+	if [ ! -d $piddir ]; then
+		mkdir $piddir
+		chown ${USER}: $piddir
+	fi
+}
+
+do_start_cmd_override() {
+	# Add --daemon to the command-line arguments
+	DAEMON_ARGS="--daemon ${DAEMON_ARGS}"
+
+	# Continue with the standard do_start_cmd() implementation
+	do_start_cmd
+}
+
