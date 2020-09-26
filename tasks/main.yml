@@ -39,10 +39,16 @@
     src: pulse_default.pa.j2
     dest: /etc/pulse/default.pa
   notify: "restart pulseaudio"
-- name: disable single shairport
+- name: remove shairport init.d script
   become: yes
+  file:
+    path: "/etc/init.d/shairport-sync"
+    state: "absent"
+- name: "disable single shairport service"
+  become: yes
+  ignore_errors: yes
   systemd:
-    name: "shairport-sync"
+    name: "shairport-sync.service"
     state: stopped
     enabled: no
 - name: configure shairport-sync
@@ -62,7 +68,7 @@
   become: yes
   copy:
     src: "shairport-sync@.service"
-    dest: "/lib/systemd/system/shairport-sync@.service"
+    dest: "/etc/systemd/system/shairport-sync@.service"
   notify: "reload systemd"
 - name: make shairport target item
   become: yes
@@ -77,7 +83,7 @@
     name: "shairport-sync.target"
     enabled: yes
     state: started
-    
+
 
 # Allegedly, using pulseaudio as a global server is bad:
 # https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/WhatIsWrongWithSystemWide/

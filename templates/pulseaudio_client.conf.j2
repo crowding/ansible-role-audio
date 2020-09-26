@@ -34,6 +34,6 @@
 ; auto-connect-localhost = no
 ; auto-connect-display = no
 
-{% for key, value in pulse_client_conf.items() %}
+{% for key, value in audio.pulse_client_conf.items() %}
 {{key}} = {{value}}
 {% endfor %}

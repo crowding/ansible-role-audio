@@ -1,8 +1,14 @@
-SUBSYSTEM!="sound", GOTO="sound_end"
-ACTION!="add", GOTO="sound_end"
-
+SUBSYSTEM!="sound", GOTO="sound_alsa_end"
+ACTION!="add", GOTO="sound_alsa_end"
 {% for out in cards %}
 DEVPATH=="{{ out.devpath }}", ATTR{id}="{{ out.name }}"
 {% endfor %}
+LABEL="sound_alsa_end"
 
-LABEL="sound_end"
+SUBSYSTEM!="sound", GOTO="sound_pulse_end"
+ACTION!="change", GOTO="sound_pulse_end"
+KERNEL!="card*", GOTO="sound_pulse_end"
+{% for out in cards %}
+DEVPATH=="{{ out.devpath }}", ENV{PULSE_NAME}="{{ out.name }}"
+{% endfor %}
+LABEL="sound_pulse_end"

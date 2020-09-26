@@ -47,11 +47,13 @@ For these instructions I am running on Armbian Wheezy install.
   the Allwinner H3 chip.
   * I had originally tried this with a Raspberry Pi, but ran into
     problems with its USB implementation. The Rpi had two USB2.0
-    ports, but on closer inspection these two ports were shared by one
-    bus, and worse, it was a passive hub.
-
-    A passive hub is a problem because many USB DACs run at USB 1.0 speed;
-    which means that while talking to the
+    ports, but on closer inspection these two ports were fed by a hub
+    on one bus, and worse, it was a passive hub.  A passive hub is a
+    problem because talking to a USB 1.0 device, like many DACs, the
+    entire bus slows down to USB 1.0 speed. But wait, there's more!
+    The Ethernet adapter sits on the USB bus, which further constrains
+    bandwidth. And newer Raspberry Pi devices have continued to put
+    the ethernet adapter on USB.
 * [One 7-port USB 2.0 hub][dlink]. This was initially required because of
   the Raspi's USB shenanigans (i.e. use a proper active hub to better while
   the Raspberry Pi offers three or four USB ports,
@@ -181,25 +183,36 @@ like,
 `/devices/platform/soc/1c1c000.usb/usb4/4-1/4-1.4/4-1.4:1.0/sound/card4`,
 where the 'cardN' is dynamically assigned. 
 
-Poke around in `/sys` and you may find some more generic information to
 
 Using this information, you can now write a file names something like
 `/etc/udev/rules.d/39-audio.rules` which would look something like
-this:
+this (here with one 5.1-channel and one 7.1-channel USB adapters that both look
+identical to udev)
 
 ```
-SUBSYSTEM!="sound", GOTO="sound_end"
-ACTION!="add", GOTO="sound_end"
-DEVPATH=="/devices/platform/soc/1c1c000.usb/usb4/4-1/4-1.3/4-1.3:1.0/sound/card?", ATTR{id} = "living-room"
-DEVPATH=="/devices/platform/soc/1c1c000.usb/usb4/4-1/4-1.3/4-1.3:1.0/sound/card?", ATTR{id} = "garage"
-DEVPATH=="/devices/platform/soc/1c1c000.usb/usb4/4-1/4-1.2/4-1.2:1.0/sound/card?", ATTR{id} = "lab"
-DEVPATH=="/devices/platform/soc/1c1c000.usb/usb4/4-1/4-1.2/4-1.2:1.0/sound/card?", ATTR{id} = "kitchen"
-DEVPATH=="/devices/platform/soc/1c1c000.usb/usb4/4-1/4-1.5/4-1.5.2/4-1.5.2:1.0/sound/card?", ATTR{id} = "patio"
-LABEL="sound_end"
+SUBSYSTEM!="sound", GOTO="sound_alsa_end"
+ACTION!="add", GOTO="sound_alsa_end"
+DEVPATH=="*/4-1.3:1.0/sound/card*", ATTR{id}="surround5"
+DEVPATH=="*/4-1.5.3:1.0/sound/card*", ATTR{id}="surround7"
+LABEL="sound_alsa_end"
+
+SUBSYSTEM!="sound", GOTO="sound_pulse_end"
+ACTION!="change", GOTO="sound_pulse_end"
+KERNEL!="card*", GOTO="sound_pulse_end"
+DEVPATH=="*/4-1.3:1.0/sound/card*", ENV{PULSE_NAME}="surround5"
+DEVPATH=="*/4-1.5.3:1.0/sound/card*", ENV{PULSE_NAME}="surround7"
+LABEL="sound_pulse_end"
 ```
+
+Note that this matches `add` events for `ATTR{id}` but matches a
+`change` event for `ENV{PULSE_NAME}`. In principle I could have
+discovered this by carefully watching udevadm monitor, but I
+discovered it in this [message][].
+
+[message]: https://lists.freedesktop.org/archives/pulseaudio-discuss/2016-November/027206.html
 
 The udev rules can also match on the vendor and brand of the device,
-whiuch might be more convenient, if you don't have devices with identical
+which might be more convenient, if you don't have devices with identical
 chipsets.
 
 I actually generate this file from Ansible via a [template][],
@@ -209,10 +222,13 @@ about the setup in one place.
 [template]: ~/.ansible/templates/audio_udev_rules.j2
 [hostvars file]: ~/.ansible/host_vars/speakers.local.yaml
 
-After writing the rules file, apply the rules using `udevadm control
---reload-rules && udevadm trigger`, then reconnect your devices. Then
-you should be able to see the names in the output of `aplay -l` as well as in 
-the directory `/proc/asound/`.
+After writing the rules file, apply the rules using 
+
+    udevadm control --reload-rules && udevadm trigger
+
+then reconnect your devices. Then you should be able to see the names
+in the output of `aplay -l` as well as in the directory
+`/proc/asound/` and `pacmd list-cards`.
 
 ## Testing
 
@@ -364,6 +380,7 @@ its data back to ALSA, in the present configuration, but that's
 neither here nor there. Do this using the alsa pulse plugin, for example:
 
     pcm.everywhere { type pulse; device "everywhere" }
+    ctl.everywhere { type pulse; device "everywhere" }
 
 # Installing Pulse
 
@@ -372,9 +389,10 @@ I want to see if PulseAudio can help. Install pulse with ```apt-get
 install pulseaudio-module-zeroconf``` (which will also install the main
 pulseaudio service.)
 
-In previous attempts with a Raspberry Pi, I failed to get pulse
-PulseAudio. It would try to talk to ALSA and then ALSA would talk back
-to pulseAudio, or something....
+In previous attempts with a Raspberry Pi on raspbian, I failed to get
+pulse PulseAudio. It would try to talk to ALSA and then ALSA would
+talk back to pulseAudio, or something.... I maybe wasn't entirely
+clear on the Linux sound architecture.
 
 But based on [this blog entry][blog] (by one of the authors of PulseAudio), I
 think that it matches my use case better than JACK. So I might try again.
@@ -384,11 +402,13 @@ List your audio devices with ``pacmd list-cards``.
 
 This told me that all the cards I'd named and configured in ALSA
 configs didn't carry over -- they have some complicated USB path name
-that that gained from scanning ` Noe, when I do a `pacmd list-cards`
+that that gained from scanning `/ Noe, when I do a `pacmd list-cards`
 it sees both the ALSA hardware cards, but it doesn't see the virtual
 plugs. I thin I will recapitulate those in pulseaudio land anyway. But
 more worrisome is, it doesn't see the card names that I set in udev
 rules?
+
+### Directing Pulse to use ALSA-lib
 
 It looks like by default, pulseaudio interprets the contents of udev
 by its own rules to make sound cards. This is controlled in
@@ -398,16 +418,53 @@ hardware detection and added:
     load-module module-alsa-sink device=surround7 tsched=0
     load-module module-alsa-sink device=surround5 tsched=0
 
-(but I originally did without `tsched=0`, which [led to a lot of chops
-and dropouts][dropouts].) When changing pulse configuration, restart Pulse with
-the commands `pulseaudio -k; pulseaudio -v -D`.
+(doing this without `tsched=0`, [led to a lot of chops and
+dropouts][dropouts].)
+
 [dropouts]: https://wiki.archlinux.org/index.php/PulseAudio/Troubleshooting#Choppy_sound_with_analog_surround_sound_setup
+
+When changing pulse configuration, restart Pulse with the commands
+`pulseaudio -k; pulseaudio -v -D`.
+
+### Directing Pulse to talk to cards on its own
+    
+
+We can also tell Pulse to talk to kernel ALSA directly. In `default.pa`:
+
+    load-module module-udev-detect
+    
+might do the trick. If not, we can connect cards manually:
+
+    load-module module-alsa-card device_id=surround5 card_name=alsa_card.surround5 rate=48000 sink_name=surround5 tsched=0
+
+If we applied the udev rules above, this should result in seeing the card names set by those rules:
+
+    pacmd list-cards | grep "\(index: \|name: \)" 
+        index: 0
+            name: <alsa_card.platform-hdmi-sound>
+        index: 1
+            name: <alsa_card.surround5>
+        index: 2
+            name: <alsa_card.surround7>
+        index: 3
+            name: <alsa_card.platform-1c22c00.codec>
+
+You may be asking, "hold on, what's the difference between
+`module-alsa-sink` and `module-alsa-card`? Moreover, how is this "not
+using ALSA?"
+
+The terminology is confusing because there are two things called ALSA:
+the kernel modules that talk to sound cards, and the userspace library
+`libalsa` (which is what is configured using `asound.conf`.) When
+using `module-alsa-sink` pulse talks to `libalsa` which may in turn
+talk to the kernel; when using `module-alsa-card` Pulse talks to the
+kernel directly.
 
 ## Testing Pulse outputs
 
 To play to a Pulse output:
 
-    mpg123 -o pulse -a alsa_output.surround7 avril.mp3
+    mpg123 -o pulse -a alsa_card.surround7 avril.mp3
 
 ## Splitting outputs
 
@@ -434,7 +491,7 @@ evidence was lines like this in the output of `pulseaudio -v`:
     I: [pulseaudio] sink.c: The sink input 3 "(null)" is moving to lab due to change of the default sink.
 
 Placing the `set-default-sink` ahead of the definitions didn't work; the
-solution was to place the `set-default-sink` after the first one was
+solution was to place the `set-default-sink` after the _first_ sink was
 defined. I also disabled the line:
 
     load-module module-default-device-restore
@@ -443,10 +500,8 @@ defined. I also disabled the line:
 
 Note that this uses channel "names" rather than channel outputs. In
 Pulse the surround channels come in a stereotyped order. Are they the
-same order as ALSA exposes?
-
-Given both alsa and pulse names for the outputs, I should check if they map
-the same. They do not. Let's see.
+same order as ALSA exposes? Given both alsa and pulse names for the
+outputs, I should check if they map the same. They do not.
 
 ALSA is mapping like this: (what ALSA channel numbers - what device outputs)
 * 0/1 - front
@@ -462,8 +517,7 @@ Whereas Pulse is mapping (what claimed in default-pa - what device outputs):
 
 So the rear and center/LFE pairs are swapped.
 
-For the present purposes I fixed the mapping in the way I am
-genrerating `default.pa`.
+For the present purposes I fixed the mapping in the template file used to generate `default.pa`.
 
 ## Combining different outputs into one virtual sink.
 
@@ -473,15 +527,87 @@ setup in one line like this:
     load-module module-combine-sink sink-name="LR_K_O" slaves="kitchen,office,living_room" channels=2
 
 Once I spelled everything right, this actually does start to work a
-bit better than the ALSA.
+bit better than the ALSA way.
 
-## [TODO] running Pulse as a service?
+## Running Pulse as a service?
 
 I would like Pulse to start at system load. Currently, it is started
-by the graphical desktop automatically. I tried changing this by
-setting `autospawn = no` in `/etc/pulse/client.conf`. 
+by the graphical desktop on login. I want to have it started at system
+load and function for multiple users.
+
+First, in `/etc/pulse/client.conf`, place 
+
+    autospawn = no
+    default-server: "unix:/tmp/pulse-server"
+    enable-memfd: "yes"
+
+This will tell Pulse clients where to connect.
+
+ to make the Pulse server accept connections over Unix sockets,in `/etc/pulse/default.pa`
+ 
+    load-module module-native-protocol-unix
+
+Now, there is a web page saying why running in system mode is [bad idea][].
+
+[bad idea]: https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/WhatIsWrongWithSystemWide/
+
+I tried changing this by setting `autospawn = no` in `/etc/pulse/client.conf`. 
+
+### Fixing <a name="permissions">permissions</a>
+
+Running off of systemd, `shairport-sync` (and other services we might
+add) runs under its own siloed user account.  With the pulse daemon
+running under my main account, I have this when I try to play
+from shairport-sync:
+
+    Sep 18 03:21:31 localhost shairport-sync[912]: ALSA lib pcm_dmix.c:1052:(snd_pcm_dmix_open) unable to create IPC semaphore
+    Sep 18 03:21:31 localhost shairport-sync[912]: alsa: error -13 ("Permission denied") opening alsa device "bedroom".
+
+This is coming from the ALSA level -- `shairport-sync` is loading
+ALSA, ALSA is parsing `asound.conf`, finding the [dmix plugin][] in
+front of the sound card, and attempting to connect to inter-process
+port associated with it, but the running copy of Pulse has already
+grabbed the sound card and isn't letting this random daemon talk to
+it. The fix is to add a couple of `ipc` options to `asound.conf`:
+[dmix plugin]: https://alsa.opensrc.org/Dmix
+
+    pcm.surround7 {
+       type dmic
+       ipc_key 2048
+       ipc_perm 0666
+       ipc_key_add_uid false
+       ....
+    }
+
+This makes it so that any user on the local machine can connect. 
+
+That does it for the individual sinks (which currently use ALSA in a
+way that skips Pulse.) However, when I play to the multiple sinks
+(which forward from ALSA to pulse) I am getting this:
+
+    Sep 18 05:55:40 localhost shairport-sync[935]: alsa: error -111 ("Connection refused") opening alsa device "everywhere".
+    Sep 18 05:55:40 localhost shairport-sync[935]: ALSA lib pulse.c:242:(pulse_connect) PulseAudio: Unable to connect: Connection refused
+
+This error is coming from the Pulse client level (here running from
+the pulse plugin loaded from userspace ALSA.)
+
+Now, the pulse server did not output anything. So the client lib must just be failing to open the pipe?
+
+Actually, on restarting the pulse server, I am getting this in the logs:
+
+    Sep 18 07:56:22 localhost pulseaudio[29068]: Loaded "module-native-protocol-tcp" (index: #16; argument: "auth-ip-acl=127.0.0.1;10.0.0.0/24 auth-anonymous=1").
+    Sep 18 07:56:22 localhost pulseaudio[29068]: Failed to parse module arguments
+    Sep 18 07:56:22 localhost pulseaudio[29068]: Failed to load module "module-native-protocol-unix" (argument: "auth_group=audio socket=/tmp/pulse-server"): initialization failed.
+
+This was due to misspelled  options -- dashes, not hyphens.
+
+### shairport-sync won't work with pulse via alsa, either
+
+Now, when running `shairport-sync` there is massive logspam with a bunch of ports being constantly
+created and destroyed. And ths sound cuts in and out.
 
 
+Oh is it because I've got a running instance of pavucontrol? No. Maybe I need to turn up the verbosity on shairport-sync.
 
 ## [TODO] Virtual sink to the garage?
 
@@ -556,15 +682,14 @@ sends back to ALSA. See [above][#relaying-to-pulse].
 
 ### over Pulse
 
-Meanwhile if I try running it over Pulse, as in `shairport-sync -o pa ...`
-it appears to connect and play, but nothing is coming out the speakers
-when playing from my mac. There is a Github post alleging that
-shairport-sync and pulse don't play well. But I earlier chose to skip
-over ALSA when creating multiple outputs. A workaround might be to
-create virtual outputs in ALSA that redirect to Pulse.
+Meanwhile if I try running it over Pulse, as in `shairport-sync -o pa
+...` it appears to connect and play, but nothing is coming out the
+speakers when playing from my mac. There is a Github post alleging
+that shairport-sync and pulse don't play well. So far it seems to work
+better using ALSA userspace libs?
 
-There is a question of whether to make Shairport use ALSA directly or
-layer it on top of Pulse. So far it seems to work better with ALSA.
+Now, the "pa" backend on shairport-sync accepts no arguments. How do I
+tell it what output to use?
 
 ### running shairport-sync as a service
 
@@ -578,13 +703,12 @@ I placed the desired arguments in `/etc/default/shairport_sync`:
 
 #### don't use init.d
 
-I tried modifying `/etc/init.d/shairport-sync` but I could not even
-figure out how to even emit log messages from it. I think init.d
-scripts are actually deprecated these days and are being redirected to
-another mechanism. You actually need to go look in
-`/lib/systemd/system/shairport-sync.service`.
+I tried messing with `/etc/init.d/shairport-sync` but I could not figure
+out how to even emit log messages from it; I eventually concluded it
+isn't being run at all, being redirected to `systemd`. Delete this
+file and look in `/lib/systemd/system/shairport-sync.service`.
 
-#### make sure to --purge
+#### make sure to --purge when you uninstall an apt package
 
 BTW. After messing up the files in `/etc/init.d` and `/etc/default`
 associated with the `shairport-sync` package, I found that if I merely
@@ -595,7 +719,7 @@ the package, unless you --purge the package. How weird is that?
 
 #### running multiple instances using a template service.
 
-Turns out systemd has a way to handle multiple instances, by defining
+Turns out systemd has a way to handle multiple instances of a daemon, by defining
 a [template service][].
 
 [template service]: https://www.stevenrombauts.be/2019/01/run-multiple-instances-of-the-same-systemd-unit/
@@ -628,7 +752,7 @@ errors:
     Sep 10 05:31:11 localhost shairport-sync[30345]: ALSA lib pulse.c:242:(pulse_connect) PulseAudio: Unable to connect: Connection refused
     Sep 10 05:31:11 localhost shairport-sync[30345]: alsa: error -111 ("Connection refused") opening alsa device "LR_K_O".
 
-This did not happen when running shairport-sync manually. This ay be
+This did not happen when running shairport-sync manually. This may be
 because the service is running as the "shairport-sync" user while the
 daemon is running as my login user. It needs to have permissions to
 talk to pulseaudio as that user.
@@ -645,7 +769,5 @@ I believe the nearest Windows/Android/Linux equiavlent to Airplay is
 Miracast. So let's see if we can set that one up too. There's
 [MiracleCast][] which might be for doing screencasting? for just
 audio, there's
-
-
 
 [miraclecast]: https://github.com/albfan/miraclecast

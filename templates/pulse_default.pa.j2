@@ -38,33 +38,23 @@ load-module module-augment-properties
 .endif
 
 ### Load audio drivers statically
-### (it's probably better to not load these drivers manually, but instead
-### use module-udev-detect -- see below -- for doing this automatically)
 {% for card in cards %}
+{% if audio.backend == "alsa" %}
 load-module module-alsa-sink device={{card.name}} tsched=0
+{% endif %}
+{% if audio.backend == "pulse" %}
+load-module module-alsa-card device_id={{card.name}} card_name=alsa_card.{{card.name}} rate={{audio.sample_rate}} sink_name={{card.name}} tsched=0
+set-card-profile alsa_card.{{card.name}} {{card.profile}}
+{% endif %}
 {% endfor %}
+
 #load-module module-alsa-source device=hw:1,0
 #load-module module-oss device="/dev/dsp" sink_name=output source_name=input
 #load-module module-oss-mmap device="/dev/dsp" sink_name=output source_name=input
 #load-module module-null-sink
 #load-module module-pipe-sink
 
-# Split cards into multiple virtual stereo sinks
-{% for card in cards %}
-{% for output in card.outputs %}
-load-module module-remap-sink sink_name={{output}} sink_properties="device.description='{{output}}'" remix=no master=alsa_output.{{card.name}} channels=2 channel_map=front-left,front-right master_channel_map={{
-['front-left','front-right','rear-left','rear-right','front-center','lfe','side-left','side-right'][loop.index0 * 2]}},{{['front-left','front-right','rear-left','rear-right','front-center','lfe','side-left','side-right'][loop.index0 * 2 + 1]}}
-{% if card == cards[0] and output == cards[0].outputs[0] %}
-set-default-sink {{cards[0].outputs[0]}}
-{% endif %}
-{% endfor %}
-{% endfor %}
-
-# virtual sinks that direct to more than one actual sink
-{% for output in virtual_outputs %}
-load-module module-combine-sink sink_name="{{ output.name }}" slaves="{{ output.combining | join(",") }}" channels=2
-{% endfor %}
-
+{% if audio.backend == "pulse" %}
 ### Automatically load driver modules depending on the hardware available
 .ifexists module-udev-detect.so
 # load-module module-udev-detect
@@ -72,6 +62,32 @@ load-module module-combine-sink sink_name="{{ output.name }}" slaves="{{ output.
 ### Use the static hardware detection module (for systems that lack udev support)
 # load-module module-detect
 .endif
+{% endif %}
+
+# Split cards into multiple virtual stereo sinks
+{% for card in cards %}
+{% for output in card.outputs %}
+{% if audio.backend == "alsa" %}
+load-module module-remap-sink sink_name={{output}} sink_properties="device.description='{{output}}'" remix=no master=alsa_output.{{card.name}} channels=2 channel_map=front-left,front-right master_channel_map={{
+['front-left','front-right','rear-left','rear-right','front-center','lfe','side-left','side-right'][loop.index0 * 2]}},{{['front-left','front-right','rear-left','rear-right','front-center','lfe','side-left','side-right'][loop.index0 * 2 + 1]}}
+{% if card == cards[0] and output == cards[0].outputs[0] %}
+set-default-sink {{cards[0].outputs[0]}}
+{% endif %}
+{% endif %}
+{% if audio.backend == "pulse" %}
+load-module module-remap-sink sink_name={{output}} sink_properties="device.description='{{output}}'" remix=no master={{card.name}} channels=2 channel_map=front-left,front-right master_channel_map={{
+['front-left','front-right','rear-left','rear-right','front-center','lfe','side-left','side-right'][loop.index0 * 2]}},{{['front-left','front-right','rear-left','rear-right','front-center','lfe','side-left','side-right'][loop.index0 * 2 + 1]}}
+{% if card == cards[0] and output == cards[0].outputs[0] %}
+set-default-sink {{cards[0].outputs[0]}}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+
+# create virtual sinks that direct to more than one actual sink
+{% for output in virtual_outputs %}
+load-module module-combine-sink sink_name="{{ output.name }}" sink_properties="device.description='{{output.name}} ({{output.combining | join(" + ")}})'" slaves="{{ output.combining | join(",") }}" channels=2
+{% endfor %}
 
 ### Automatically connect sink and source if JACK server is present
 .ifexists module-jackdbus-detect.so
@@ -89,17 +105,13 @@ load-module module-bluetooth-policy
 load-module module-bluetooth-discover
 .endif
 
-### Load several protocols
-.ifexists module-esound-protocol-unix.so
-load-module module-esound-protocol-unix
-.endif
-load-module module-native-protocol-unix
+{% for c in audio.pulse_default_pa %}
+{{ c.command }} {{ c.name }} {{ c.args }}
+{% endfor %}
 
 ### Network access (may be configured with paprefs, so leave this commented
 ### here if you plan to use paprefs)
 #load-module module-esound-protocol-tcp
-#load-module module-native-protocol-tcp
-#load-module module-zeroconf-publish
 
 ### Load the RTP receiver module (also configured via paprefs, see above)
 #load-module module-rtp-recv
@@ -116,7 +128,6 @@ load-module module-native-protocol-unix
 load-module module-gsettings
 .fail
 .endif
-
 
 ### Automatically restore the default sink/source when changed by the user
 ### during runtime

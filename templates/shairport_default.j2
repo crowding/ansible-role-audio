@@ -4,8 +4,8 @@
 # installed at /etc/default/shairport-sync by the maintainer scripts
 
 # Additional options that are passed to the Daemon.
-DAEMON_ARGS="-o alsa -a {{ cards[0].outputs[0] }} -p {{ airplay_lowest_port }} -- -d {{ cards[0].outputs[0] }}"
-{% set port = namespace(value=airplay_lowest_port) %}
+DAEMON_ARGS="-o alsa -a {{ cards[0].outputs[0] }} -p {{ audio.airplay_lowest_port }} -- -d {{ cards[0].outputs[0] }}"
+{% set port = namespace(value=audio.airplay_lowest_port) %}
 {% for card in cards %}
 {% for sink in card.outputs %}
 DAEMON_ARGS_{{sink}}="-o alsa -a {{ sink }} -p {{ port.value }} -- -d {{ sink }}"

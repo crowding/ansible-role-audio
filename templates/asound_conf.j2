@@ -1,12 +1,26 @@
+
 {% for card in cards %}
+  {% if audio.backend == "alsa" %}#
 pcm.{{card.name}} {
    type dmix
    ipc_key {{2048 + loop.index0}}
-   slave { pcm { type hw; card {{card.name}}; rate {{sample_rate}} }; channels {{ 2 * card.outputs|length }} }
-   
+   ipc_perm 0666
+   ipc_key_add_uid false
+   slave { pcm { type hw; card {{card.name}}; rate {{ audio.sample_rate }} }; channels {{ 2 * card.outputs|length }} }
 }
+  {% endif %}
+  {% if audio.backend == "pulse" %}
+# card {{card.name}} should be visible from Pulse... 
+  {% endif %}
 
-{% for output in card.outputs %}
+  {% for output in card.outputs %}
+    {% if audio.backend == "pulse" or audio.pulse_splits %}#
+
+pcm.{{output}} { type pulse; device {{ output }} }
+ctl.{{output}} { type pulse; device {{ output }} }
+
+    {% else %}#
+
 pcm.{{output}} {
   type plug
   slave {
@@ -20,10 +34,10 @@ pcm.{{output}} {
   }
   route_policy default
 }
-
 ctl.{{output}} { type hw; card {{card.name}} }
 
-{% endfor %}
+    {% endif %}
+  {% endfor %}
 {% endfor %}
 
 {% for output in virtual_outputs %}
@@ -33,4 +47,10 @@ ctl.{{output.name}} { type pulse; device {{ output.name }} }
 
 pcm.!default { type plug; pcm {{cards[0].outputs[0]}} }
 
+{% if audio.backend == "alsa" %}
 ctl.!default { type hw; pcm {{cards[0].name}} }
+{% endif %}
+
+{% if audio.backend == "pulse" %}
+ctl.!default { type pulse; device {{cards[0].name}} }
+{% endif %}

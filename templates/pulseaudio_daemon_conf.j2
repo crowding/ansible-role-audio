@@ -1,3 +1,4 @@
-{% for key, value in pulse_daemon_conf.items() %}
+default-sample-rate = {{audio.sample_rate}}
+{% for key, value in (audio.pulse_daemon_conf).items() %}
 {{key}} = {{value}}
 {% endfor %}

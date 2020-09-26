@@ -1,28 +1,31 @@
-sample_rate: 48000
-airplay_lowest_port: 5000
 
-pulse_daemon_conf:
-  high-priority: no
-  nice-level: -1
-  realtime-scheduling: yes
-  realtime-priority: 5
-  flat-volumes: no
-  resample-method: speex-float-1
-  default-sample-rate: "{{ sample_rate }}"
-  deferred-volume-safety-margin-usec: 10
+audio:
+  sample_rate: 48000
+  backend: "pulse" # what usespace lib talks to the card
+  pulse_splits: no
+  airplay_lowest_port: 5000
 
-pulse_default_pa:
-  - command: load-module
-    name: "module-native-protocol-tcp"
-    args: "auth-ip-acl=127.0.0.1;10.0.0.0/24 auth-anonymous=1"
-  - command: load-module
-    name: "module-native-protocol-unix"
-    args: "auth_group=audio socket=/tmp/pulse-server"
-  - command: load-module
-    name: "module-zeroconf-publish"
-    args: ""
+  pulse_daemon_conf:
+    high-priority: no
+    nice-level: -1
+    realtime-scheduling: yes
+    realtime-priority: 5
+    flat-volumes: no
+    resample-method: speex-float-1
+    deferred-volume-safety-margin-usec: 10
 
-pulse_client_conf:
-  autospawn: "no"
-  default-server: "unix:/tmp/pulse-server"
-  enable-memfd: "yes"
+  pulse_default_pa:
+    - command: load-module
+      name: "module-native-protocol-tcp"
+      args: "auth-ip-acl=127.0.0.1;10.0.0.0/24;192.168.0.0/24 auth-anonymous=1"
+    - command: load-module
+      name: "module-native-protocol-unix"
+      args: "auth-group=audio socket=/tmp/pulse-server"
+    - command: load-module
+      name: "module-zeroconf-publish"
+      args: ""
+
+  pulse_client_conf:
+    autospawn: "no"
+    default-server: "unix:/tmp/pulse-server"
+    enable-memfd: "yes"
