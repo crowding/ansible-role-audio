@@ -541,19 +541,17 @@ First, in `/etc/pulse/client.conf`, place
     default-server: "unix:/tmp/pulse-server"
     enable-memfd: "yes"
 
-This will tell Pulse clients where to connect.
-
- to make the Pulse server accept connections over Unix sockets,in `/etc/pulse/default.pa`
+To make the Pulse server accept connections over Unix sockets,in `/etc/pulse/default.pa`
  
-    load-module module-native-protocol-unix
+    load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1;10.0.0.0/24;192.168.0.0/24 auth-anonymous=1
+    load-module module-native-protocol-unix auth-group=audio socket=/tmp/pulse-server
+    load-module module-zeroconf-publish 
 
-Now, there is a web page saying why running in system mode is [bad idea][].
+Now, there is a web page saying why running in system mode is [bad idea][]. I'm not sure these apply.
 
 [bad idea]: https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/WhatIsWrongWithSystemWide/
 
-I tried changing this by setting `autospawn = no` in `/etc/pulse/client.conf`. 
-
-### Fixing <a name="permissions">permissions</a>
+### Fixing <a name="permissions">permissions</a> with ALSA backend
 
 Running off of systemd, `shairport-sync` (and other services we might
 add) runs under its own siloed user account.  With the pulse daemon
@@ -601,13 +599,7 @@ Actually, on restarting the pulse server, I am getting this in the logs:
 
 This was due to misspelled  options -- dashes, not hyphens.
 
-### shairport-sync won't work with pulse via alsa, either
 
-Now, when running `shairport-sync` there is massive logspam with a bunch of ports being constantly
-created and destroyed. And ths sound cuts in and out.
-
-
-Oh is it because I've got a running instance of pavucontrol? No. Maybe I need to turn up the verbosity on shairport-sync.
 
 ## [TODO] Virtual sink to the garage?
 
@@ -663,30 +655,38 @@ Run a small instance of shairport-sync with, e.g.:
 
     shairport-sync -o alsa -a lab -p 5000 -- -d lab
 
-#### low volume?
+Now, I ran into a problem when pulse used libalsa as its backend. Data
+was going from shairport-sync through libalsa to pulse to libalsa
+again. 
 
-At first this appeared to play nothing, but I found it is actually
-playing very softly.
-
-This problem went away, not sure why. Running pulsemixer? A fix in
-ctl block in alsamixer?
+I switched to using Pulse to talk directly to kernel alsa and
+configured libalsa to talk to pulse.
 
 #### forwarding virtual outputs from ALSA to Pulse
 
-If I use ALSA, this will require driving the virtual multiple outputs
-from ALSA. I had [earlier][#multiple] decided to create the virtual
-outputs using Pulse, which is capable of correcting for clock skew. I
-instead opted to crewate shadow virtual devices that pipe from ALSA to
-Pulse, which handles synchronization between devices better, and then
-sends back to ALSA. See [above][#relaying-to-pulse].
+Even when using the libalsa backend, I am creating my multiple virtual
+outputs using Pulse, because it can correct for clock drift. So for
+multiple-outputs, my `asound.conf` forwards those sinks to Pulse,
+which forwards them back to Alsa. See [above][#relaying-to-pulse].
+
+But this caused a problem with using shairport-sync. The connection kept
+starting and dropping. Something in the chain of shairport-sync -> libalsa -> pulseaudio -> libalsa(again) -> kernel seemed to be messing up its 
+
+Using Pulse as the system's backend seemed to fix this; now the chain goes to shairport-sync -> libalsa -> pulseaudio -> kernel.
+
+
+
+If pulse outputs to ALSA, ALSA will have to send to Pulse as the
+backend, this will require driving the virtual multiple outputs from
+ALSA. I had [earlier][#multiple] decided to create the virtual outputs
+using Pulse, which is capable of correcting for clock skew. I instead
+opted to crewate shadow virtual devices that pipe from ALSA to Pulse,
+which handles synchronization between devices better, and then sends
+back to ALSA.
 
 ### over Pulse
 
-Meanwhile if I try running it over Pulse, as in `shairport-sync -o pa
-...` it appears to connect and play, but nothing is coming out the
-speakers when playing from my mac. There is a Github post alleging
-that shairport-sync and pulse don't play well. So far it seems to work
-better using ALSA userspace libs?
+But shairport-sync also includes a pulse backend. 
 
 Now, the "pa" backend on shairport-sync accepts no arguments. How do I
 tell it what output to use?
