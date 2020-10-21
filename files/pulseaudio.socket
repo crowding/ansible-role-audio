@@ -1,0 +1,10 @@
+[Unit]
+Description=Sound System
+
+[Socket]
+Priority=6
+Backlog=5
+ListenStream=/tmp/pulse-server
+
+[Install]
+WantedBy=sockets.target

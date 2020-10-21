@@ -1,24 +1,5 @@
 - name: restart avahi-daemon
   service: name=avahi-daemon state=restarted
-- name: check if pulseaudio running
-  command: pulseaudio --check
-  register: pa_running
-  ignore_errors: yes
-  listen:
-    - "stop pulseaudio"
-    - "restart pulseaudio"
-- name: "kill pulseaudio"
-  command: pulseaudio -k
-  when: pa_running is succeeded
-  listen:
-    - "stop pulseaudio"
-    - "restart pulseaudio"
-    - "reload alsa"
-- name: "restart pulseaudio daemon"
-  command: pulseaudio -v -D
-  listen:
-    - "restart pulseaudio"
-    - "reload alsa"
 - name: "reload udev rules"
   become: yes
   command: udevadm control --reload-rules
@@ -38,6 +19,31 @@
   systemd:
     daemon_reload: yes
   listen: "reload systemd"
+- name: check if pulseaudio running
+  command: "pulseaudio --check"
+  register: pa_running
+  ignore_errors: yes
+  listen:
+    - "stop pulseaudio"
+    - "restart pulseaudio"
+    - "reload alsa"
+    - "reload systemd"
+- name: "kill pulseaudio"
+  command: pulseaudio -k
+  when: pa_running is succeeded
+  listen:
+    - "stop pulseaudio"
+    - "restart pulseaudio"
+    - "reload alsa"
+    - "reload systemd"
+- name: "restart pulseaudio daemon"
+  systemd:
+    name: pulseaudio
+    enabled: yes
+  listen:
+    - "restart pulseaudio"
+    - "reload alsa"
+    - "reload systemd"
 - name: "start shairport"
   become: yes
   systemd:
@@ -45,5 +51,6 @@
     state: restarted
   listen:
     - "restart shairport"
+    - "restart pulseaudio"
     - "reload systemd"
     - "reload alsa"

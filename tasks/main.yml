@@ -1,8 +1,8 @@
 - name: configure udev
   become: yes
   template:
-    src: udev_rules.j2
-    dest: /etc/udev/rules.d/39-audio.rules
+    src: "udev_rules.j2"
+    dest: "/etc/udev/rules.d/39-audio.rules"
   notify: "reload udev rules"
 - name: install packages
   become: yes
@@ -13,37 +13,54 @@
     # - pulse-audio-x11
     - shairport-sync
     - pulsemixer
+    - bluez
     state: present
 - name: asound conf
   become: yes
   template:
-    src: asound_conf.j2
-    dest: /etc/asound.conf
+    src: "asound_conf.j2"
+    dest: "/etc/asound.conf"
   notify:
     - "reload alsa"
 - name: write pulseaudio daemon.conf
   become: yes
   template:
-    src: pulseaudio_daemon_conf.j2
-    dest: /etc/pulse/daemon.conf
+    src: "pulseaudio_daemon_conf.j2"
+    dest: "/etc/pulse/daemon.conf"
   notify: "restart pulseaudio"
 - name: write pulseaudio client conf
   become: yes
   template:
-    src: pulseaudio_client.conf.j2
-    dest: /etc/pulse/client.conf
+    src: "pulseaudio_client.conf.j2"
+    dest: "/etc/pulse/client.conf"
   notify: "restart shairport"
 - name: write pulseaudio default.pa
   become: yes
   template:
-    src: pulse_default.pa.j2
-    dest: /etc/pulse/default.pa
+    src: "pulse_default.pa.j2"
+    dest: "/etc/pulse/default.pa"
   notify: "restart pulseaudio"
-- name: remove shairport init.d script
+- name: remove pulseaudio user service entries
   become: yes
   file:
-    path: "/etc/init.d/shairport-sync"
-    state: "absent"
+    path: "{{item}}"
+    state: absent
+  loop:
+    - "/usr/lib/systemd/user/pulseaudio.service"
+    - "/usr/lib/systemd/user/pulseaudio.socket"
+    - "/etc/systemd/user/default.target.wants/pulseaudio.service"
+    - "/etc/systemd/user/sockets.target.wants/pulseaudio.socket"
+    - "/etc/init.d/shairport-sync"
+  notify: "reload systemd"
+- name: make pulseaudio systemd service
+  become: yes
+  copy:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
+  loop:
+    - {src: "pulseaudio.service", dest: "/etc/systemd/system/pulseaudio.service"}
+    - {src: "pulseaudio.socket", dest: "/etc/systemd/system/pulseaudio.socket"}
+  notify: "reload systemd"
 - name: "disable single shairport service"
   become: yes
   ignore_errors: yes
@@ -83,16 +100,3 @@
     name: "shairport-sync.target"
     enabled: yes
     state: started
-
-
-# Allegedly, using pulseaudio as a global server is bad:
-# https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/WhatIsWrongWithSystemWide/
-#
-# but it can be done:
-#
-# https://askubuntu.com/questions/939144/playing-audio-stops-in-unity-when-i-switch-user/939338#939338
-# https://askubuntu.com/questions/28176/how-do-i-run-pulseaudio-in-a-headless-server-installation
-#
-# However it may be better to specify that the default-logged-in user
-# uses pulseaudio?
-

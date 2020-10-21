@@ -6,9 +6,9 @@ audio:
   airplay_lowest_port: 5000
 
   pulse_daemon_conf:
-    high-priority: no
-    nice-level: -1
-    realtime-scheduling: yes
+    high-priority: "no"
+    nice-level: -11
+    realtime-scheduling: "yes"
     realtime-priority: 5
     flat-volumes: no
     resample-method: speex-float-1

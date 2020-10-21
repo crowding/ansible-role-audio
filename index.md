@@ -529,26 +529,42 @@ setup in one line like this:
 Once I spelled everything right, this actually does start to work a
 bit better than the ALSA way.
 
-## Running Pulse as a service?
+## Running Pulse as a service
 
-I would like Pulse to start at system load. Currently, it is started
+I would like Pulse to start at system load. By default, it is started
 by the graphical desktop on login. I want to have it started at system
 load and function for multiple users.
 
-First, in `/etc/pulse/client.conf`, place 
+First, in `/etc/pulse/client.conf`, place
 
     autospawn = no
     default-server: "unix:/tmp/pulse-server"
     enable-memfd: "yes"
 
 To make the Pulse server accept connections over Unix sockets,in `/etc/pulse/default.pa`
- 
+
     load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1;10.0.0.0/24;192.168.0.0/24 auth-anonymous=1
     load-module module-native-protocol-unix auth-group=audio socket=/tmp/pulse-server
     load-module module-zeroconf-publish 
+    
+Then I made a file in `/etc/systemd/system/pulseaudio.service` to start pulseaudio as a daemon:
 
-Now, there is a web page saying why running in system mode is [bad idea][]. I'm not sure these apply.
+    [Unit]
+    Description=Pulse Audio
+    Documentation=man:pulseaudio(1)
+    After=sound.target
 
+    [Service]  
+    Type=simple  
+    ExecStart=/usr/bin/pulseaudio -v
+    User=pulse
+    Group=audio
+
+Now, PulseAudio offers something called [system mode][], which requires you to start the server as root in multi-user audio setups. And there is [a page about the dire consequences of doing so.][bad idea]. The thing is, I was able to make shairport-sync connect, from one user account, to a pulseaudio daemon running under a different user account, without running in system mode. And I know it's not running in system mode because it's obeying the configuration in `default.pa` and not that in `system.pa`. So it seems like system mode isn't even necessary, in the headless server scenario. `systemd` takes care of daemonizing and insulating pulseaudio in its own user account.
+
+Now, there is already a "user" pulseaudio service defined in `/usr/lib/systemd/user/pulseaudio.service` and `/usr/lib/systemd/user/pulseaudio.socket`. This apparently is how the logged-in user requests a pulseaudio server to start up -- systemd spawns the server on connection to the socket. I wound up deleting the pulseaudio files in `/usr/lib/systemd/user/` (as well as the symlinks that point to them) and creating similar files in `/etc/systemd/system` to define a system service. I found it was _not_ necessary to use pulseaudio's "system mode;" systemd is perfectly capable of starting a program under a daemon account.
+
+[system mode]: https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/SystemWide/
 [bad idea]: https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/WhatIsWrongWithSystemWide/
 
 ### Fixing <a name="permissions">permissions</a> with ALSA backend
@@ -599,7 +615,16 @@ Actually, on restarting the pulse server, I am getting this in the logs:
 
 This was due to misspelled  options -- dashes, not hyphens.
 
+## Acting as a Bluetooth sink
 
+My server has a builtin bluetooth radio. After airPlay, Bluetooth is
+the next most important protocol to support. (IDK what Windows uses
+for an over-the-network audio protocol?).
+
+Hopefully I will be able to advertise each of my virtual outputs as
+Bluetooth hosts. Let's see how we can set that up.
+
+Pulseaudio supports creating a bluetooth sink...
 
 ## [TODO] Virtual sink to the garage?
 
@@ -669,24 +694,20 @@ outputs using Pulse, because it can correct for clock drift. So for
 multiple-outputs, my `asound.conf` forwards those sinks to Pulse,
 which forwards them back to Alsa. See [above][#relaying-to-pulse].
 
-But this caused a problem with using shairport-sync. The connection kept
-starting and dropping. Something in the chain of shairport-sync -> libalsa -> pulseaudio -> libalsa(again) -> kernel seemed to be messing up its 
+But this caused a problem with using shairport-sync. The connection
+kept starting and dropping. Something in the chain of shairport-sync
+-> libalsa -> pulseaudio -> libalsa(again) -> kernel seemed to be
+messing up its
 
-Using Pulse as the system's backend seemed to fix this; now the chain goes to shairport-sync -> libalsa -> pulseaudio -> kernel.
+Using Pulse as the system's backend seemed to improve this; now the chain
+goes shairport-sync -> libalsa -> pulseaudio -> kernel.
+
+But shairport-sync also uses a pulseaudio backend; that would get
+libalsa the whoel way out of the way.
 
 
-
-If pulse outputs to ALSA, ALSA will have to send to Pulse as the
-backend, this will require driving the virtual multiple outputs from
-ALSA. I had [earlier][#multiple] decided to create the virtual outputs
-using Pulse, which is capable of correcting for clock skew. I instead
-opted to crewate shadow virtual devices that pipe from ALSA to Pulse,
-which handles synchronization between devices better, and then sends
-back to ALSA.
 
 ### over Pulse
-
-But shairport-sync also includes a pulse backend. 
 
 Now, the "pa" backend on shairport-sync accepts no arguments. How do I
 tell it what output to use?
@@ -701,11 +722,11 @@ I placed the desired arguments in `/etc/default/shairport_sync`:
 
 ### running several instances of shairport-sync as a service.
 
-#### don't use init.d
+#### check if your distro uses init.d or systemd
 
 I tried messing with `/etc/init.d/shairport-sync` but I could not figure
 out how to even emit log messages from it; I eventually concluded it
-isn't being run at all, being redirected to `systemd`. Delete this
+isn't being run at all, as my distribution uses `systemd`. Delete this
 file and look in `/lib/systemd/system/shairport-sync.service`.
 
 #### make sure to --purge when you uninstall an apt package
