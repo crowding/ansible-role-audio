@@ -1,0 +1,36 @@
+- name: Bluetooth packages
+  become: yes
+  apt:
+    name:
+      - bluez
+      - bluez-tools
+      - rfkill
+      - pulseaudio-module-bluetooth
+    state: installed
+- name: let us talk to bluetooth
+  user:
+    name: "{{item}}"
+    groups: [bluetooth]
+    append: yes
+  loop: ["{{ansible_user}}", "pulse"]
+- name: enable multiple profiles?
+  lineinfile:
+    become: yes
+    path: "/etc/bluetooth/main.conf"
+    regexp: "{{item.regexp}}"
+    line: "{{item.line}}"
+    notify: "restart bluetooth"
+  loop:
+    - { regexp: "^[ #]*MultiProfile *="; line: "MultiProfile = single" }
+    - { regexp: "^[ #]*DiscoverableTimeout *="; line: "DiscoverableTimeout = 0" }
+    - { regexp: "^[ #]*PairableTimeout *="; line: "PairableTimeout = 0" }
+- name: frob bluetoothctl
+  text: |
+    select 00:1A:7D:DA:71:13
+    system-alias upstairs
+    
+    pairable yes
+    discoverable yes
+    discoverable-timeout 0
+    
+    

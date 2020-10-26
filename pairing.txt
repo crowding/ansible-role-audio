@@ -1,0 +1,110 @@
+[bluetooth]# default-agent
+Default agent request successful
+[NEW] Device 7C:A1:AE:C4:46:E9 Peter's iPhone
+Request confirmation
+[agent] Confirm passkey 668772 (yes/no): yes
+[CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 0000110c-0000-1000-8000-00805f9b34fb
+[CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 0000110e-0000-1000-8000-00805f9b34fb
+[NEW] Primary Service (Handle 0x10c4)
+	/org/bluez/hci0/dev_7C_A1_AE_C4_46_E9/service0006
+	00001801-0000-1000-8000-00805f9b34fb
+	Generic Attribute Profile
+[NEW] Characteristic (Handle 0x6bc5)
+	/org/bluez/hci0/dev_7C_A1_AE_C4_46_E9/service0006/char0007
+	00002a05-0000-1000-8000-00805f9b34fb
+	Service Changed
+[NEW] Descriptor (Handle 0x10a0)
+	/org/bluez/hci0/dev_7C_A1_AE_C4_46_E9/service0006/char0007/desc0009
+	00002902-0000-1000-8000-00805f9b34fb
+	Client Characteristic Configuration
+[NEW] Primary Service (Handle 0x10c4)
+	/org/bluez/hci0/dev_7C_A1_AE_C4_46_E9/service000a
+	d0611e78-bbb4-4591-a5f8-487910ae4366
+	Vendor specific
+[NEW] Characteristic (Handle 0x6bc5)
+	/org/bluez/hci0/dev_7C_A1_AE_C4_46_E9/service000a/char000b
+	8667556c-9a37-4c91-84ed-54ee27d90049
+	Vendor specific
+[NEW] Descriptor (Handle 0x10a0)
+	/org/bluez/hci0/dev_7C_A1_AE_C4_46_E9/service000a/char000b/desc000d
+	00002900-0000-1000-8000-00805f9b34fb
+	Characteristic Extended Properties
+[NEW] Descriptor (Handle 0x10a0)
+	/org/bluez/hci0/dev_7C_A1_AE_C4_46_E9/service000a/char000b/desc000e
+	00002902-0000-1000-8000-00805f9b34fb
+	Client Characteristic Configuration
+[NEW] Primary Service (Handle 0x10c4)
+	/org/bluez/hci0/dev_7C_A1_AE_C4_46_E9/service000f
+	9fa480e0-4967-4542-9390-d343dc5d04ae
+	Vendor specific
+[NEW] Characteristic (Handle 0x6bc5)
+	/org/bluez/hci0/dev_7C_A1_AE_C4_46_E9/service000f/char0010
+	af0badb1-5b99-43cd-917a-a77bc549e3cc
+	Vendor specific
+[NEW] Descriptor (Handle 0x10a0)
+	/org/bluez/hci0/dev_7C_A1_AE_C4_46_E9/service000f/char0010/desc0012
+	00002900-0000-1000-8000-00805f9b34fb
+	Characteristic Extended Properties
+[NEW] Descriptor (Handle 0x10a0)
+	/org/bluez/hci0/dev_7C_A1_AE_C4_46_E9/service000f/char0010/desc0013
+	00002902-0000-1000-8000-00805f9b34fb
+	Client Characteristic Configuration
+[CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 0000110c-0000-1000-8000-00805f9b34fb
+[CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 0000110e-0000-1000-8000-00805f9b34fb
+[CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 00001800-0000-1000-8000-00805f9b34fb
+[CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 00001801-0000-1000-8000-00805f9b34fb
+[CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 9fa480e0-4967-4542-9390-d343dc5d04ae
+[CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: d0611e78-bbb4-4591-a5f8-487910ae4366
+[CHG] Device 7C:A1:AE:C4:46:E9 ServicesResolved: yes
+[CHG] Device 7C:A1:AE:C4:46:E9 Paired: yes
+Authorize service
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 Name: iPhone
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 Alias: iPhone
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 Modalias: bluetooth:v004Cp7308d0D70
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 00000000-deca-fade-deca-deafdecacafe
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 00001000-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 0000110a-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 0000110c-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 0000110e-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 00001116-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 0000111f-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 0000112f-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 00001132-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 00001200-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 00001800-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 00001801-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 02030302-1d19-415f-86f2-22a2106a0a77
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 9fa480e0-4967-4542-9390-d343dc5d04ae
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: d0611e78-bbb4-4591-a5f8-487910ae4366
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 Icon: phone
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 Appearance is nil
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): Request canceled
+[CHG] Device 7C:A1:AE:C4:46:E9 ServicesResolved: no
+[CHG] Device 7C:A1:AE:C4:46:E9 Connected: no
+[CHG] Device 7C:A1:AE:C4:46:E9 Connected: yes
+[CHG] Device 7C:A1:AE:C4:46:E9 Name: Peter's iPhone
+[CHG] Device 7C:A1:AE:C4:46:E9 Alias: Peter's iPhone
+Authorize service
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 Name: iPhone
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 Alias: iPhone
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 ServicesResolved: yes
+[agent] Authorize service 0000110d-0000-1000-8000-00805f9b34fb (yes/no): yes
+Authorize service
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 00000000-deca-fade-deca-deafdecacafe
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 00001000-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 0000110a-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 0000110c-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 0000110d-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 0000110e-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 00001116-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 0000111f-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 0000112f-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 00001132-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 00001200-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 00001800-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 00001801-0000-1000-8000-00805f9b34fb
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 02030302-1d19-415f-86f2-22a2106a0a77
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: 9fa480e0-4967-4542-9390-d343dc5d04ae
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): [CHG] Device 7C:A1:AE:C4:46:E9 UUIDs: d0611e78-bbb4-4591-a5f8-487910ae4366
+[agent] Authorize service 0000110e-0000-1000-8000-00805f9b34fb (yes/no): yes
+[CHG] Controller 00:1A:7D:DA:71:13 Discoverable: no

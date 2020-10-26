@@ -13,7 +13,7 @@
     # - pulse-audio-x11
     - shairport-sync
     - pulsemixer
-    - bluez
+    - pulseaudio-utils
     state: present
 - name: asound conf
   become: yes
@@ -34,6 +34,9 @@
     src: "pulseaudio_client.conf.j2"
     dest: "/etc/pulse/client.conf"
   notify: "restart shairport"
+- name: bluetooth
+  import_tasks: "bluetooth.yml"
+  when: audio.bluetooth_rx or audio.bluetooth_tx
 - name: write pulseaudio default.pa
   become: yes
   template:
@@ -97,6 +100,10 @@
 - name: enable multi shairport
   become: yes
   systemd:
-    name: "shairport-sync.target"
+    name: "{{item}}"
     enabled: yes
     state: started
+  loop:
+    - "bluetooth.service"
+    - "pulseaudio.service"
+    - "shairport-sync.target"

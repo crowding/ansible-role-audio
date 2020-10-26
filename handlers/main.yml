@@ -14,6 +14,12 @@
     name: "shairport-sync.target"
     state: stopped
   listen: "reload systemd"
+- name: "restart bluetooth"
+  become: yes
+  systemd:
+    name: "bluetooth.service"
+    state: restarted
+  listen: "restart bluetooth"
 - name: "reload systemd"
   become: yes
   systemd:

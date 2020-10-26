@@ -99,7 +99,7 @@ Here's a short list of network sound protocols:
 * PulseAudio is standard on Linux
 * JACK, another Linux option aimed at more technically
   exacting setups
-* Miracast?
+* Miracast? DLNA? What does Android use for network audio?
 * Bluetooth
 
 * The [`shairport`][shairport] package emulates an AirPlay audio
@@ -617,14 +617,96 @@ This was due to misspelled  options -- dashes, not hyphens.
 
 ## Acting as a Bluetooth sink
 
-My server has a builtin bluetooth radio. After airPlay, Bluetooth is
-the next most important protocol to support. (IDK what Windows uses
-for an over-the-network audio protocol?).
+After AirPlay, Bluetooth is the next most important protocol to
+support. (IDK what Windows uses for an over-the-network audio
+protocol?).
 
-Hopefully I will be able to advertise each of my virtual outputs as
-Bluetooth hosts. Let's see how we can set that up.
+Since my current system doesn't have a bluetooth radio, I plugged in a
+USB one. Finding an adapter that works with Linux can be tricky. I am
+using a BT4.0 adapter based on a CSR chipset, which seems well
+supported. But as far as BT 5.0 goes, ??? There is recently support in
+the kernel for Realtek RTL8763B chip, but I can find no non-fake USB
+dongles using that chip yet.
 
-Pulseaudio supports creating a bluetooth sink...
+Assuming Bluetooth is running and Pulse knows about it, we can try
+pairing it to my phone [using bluetoothctl][]. I followed Ubuntu's
+[pairing][] instructions. For authentication, bluetoothctl asked me
+to check that the same six-digit code was displayed on both ends, and
+I was able to play from my phone and the audio came out of
+pulseaudio's default sink. 
+[using bluetoothctl]:
+https://computingforgeeks.com/connect-to-bluetooth-device-from-linux-terminal/
+[pairing]: https://core.docs.ubuntu.com/en/stacks/bluetooth/bluez/docs/reference/pairing/inbound
+
+But then the connection broke, and would not reconnect.
+
+### Always discoverable
+
+Permanently turn on discoverability by editing `/etc/bluetooth/main.conf`. and setting
+
+### [TODO] Multiple virtual devices?
+
+I would like to be able to drive multiple bluetooth devices, or select
+the output that the bluetooth goes to. Can I make my dongle appear as
+multiple bluetooth devices? There is a mention in
+`/etc/bluetooth/main.conf` of something called "Multiple Profiles Multiple Devices"
+
+    # Enables Multi Profile Specification support. This allows to specify if
+    # system supports only Multiple Profiles Single Device (MPSD) configuration
+    # or both Multiple Profiles Single Device (MPSD) and Multiple Profiles Multiple
+    # Devices (MPMD) configurations.
+    # Possible values: "off", "single", "multiple"
+    #MultiProfile = off
+
+The Bluetooth spec has this to say:
+
+> *Single Profile Multiple Devices (SPMD):* In this configuration, a
+> single profile is used concurrently between several Bluetooth
+> devices. For example, one device runs multiple instances of the same
+> profile and each instance is connected to a separate Bluetooth device
+> supporting that profile.
+
+This sounds like what I want -- to run multiple A2DP sinks that connect to different devices.
+
+Then, I think I need to load the bluetooth module multiple times in pulseaudio?
+
+[TODO]
+
+### PIN authentication
+
+I would like to authenticate with a PIN, so that I don't have to ssh
+in and run `bluetoothctl` to pair things. This behavior is controlled
+by what blueZ calls an "[agent][]," which is some external program that runs and is 
+[agent]: https://www.kynetics.com/docs/2018/pairing_agents_bluez/
+
+    [bluetooth]# agent off
+    Agent unregistered
+    [bluetooth]# agent KeyboardOnly
+    Agent registered
+    [bluetooth]# default-agent
+    Default agent request successful
+
+But when I do this, it doesn't pair. It connects then immediately disconnects.
+
+Can I make this more verbose? meanwhile, what does blueman do?
+
+The last post in this [thread][] sheds some light.
+[thread]: https://www.linuxquestions.org/questions/linux-wireless-networking-41/setting-up-bluez-with-a-passkey-pin-to-be-used-as-headset-for-iphone-816003/
+
+
+
+### [TODO] pacmd won't connect?
+
+
+
+### Attaching Bluetooth speakers
+
+
+## [TODO] Web UI for bluetooth and Pulse control
+
+Since this is a headless server, there are some things that still
+require manual intervention such as Bluetooth pairing and switching
+Pulse outputs.
 
 ## [TODO] Virtual sink to the garage?
 
@@ -632,7 +714,7 @@ In the garage, which isn't physically wired to the rest of the house,
 I have an Apple Airport Express -- an ancient one that
 [modern MacOS refuses to configure][express], even. It has an airplay
 output. Can I add it to this system? What I want is for PulseAudio to
-discover the device and add it to the available sinks.
+discover the Airport device and add it to the available sinks.
 
 [express][]
 [raop][https://www.reddit.com/r/linuxaudio/comments/cvlg5d/configuring_airplay_speaker_as_pulseaudio_sink/]
