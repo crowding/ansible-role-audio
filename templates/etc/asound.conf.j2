@@ -1,5 +1,5 @@
 
-{% for card in cards %}
+{% for card in audio.cards %}
   {% if audio.backend == "alsa" %}#
 pcm.{{card.name}} {
    type dmix
@@ -40,17 +40,17 @@ ctl.{{output}} { type hw; card {{card.name}} }
   {% endfor %}
 {% endfor %}
 
-{% for output in virtual_outputs %}
+{% for output in audio.virtual_outputs %}
 pcm.{{output.name}} { type pulse; device {{ output.name }} }
 ctl.{{output.name}} { type pulse; device {{ output.name }} }
 {% endfor %}
 
-pcm.!default { type plug; pcm {{cards[0].outputs[0]}} }
+pcm.!default { type plug; pcm {{audio.cards[0].outputs[0]}} }
 
 {% if audio.backend == "alsa" %}
-ctl.!default { type hw; pcm {{cards[0].name}} }
+ctl.!default { type hw; pcm {{audio.cards[0].name}} }
 {% endif %}
 
 {% if audio.backend == "pulse" %}
-ctl.!default { type pulse; device {{cards[0].name}} }
+ctl.!default { type pulse; device {{audio.cards[0].name}} }
 {% endif %}

@@ -1,0 +1,6 @@
+[Unit]
+Description=shairport-sync Workers
+Requires={% for card in audio.cards %}{% for sink in card.outputs %} shairport-sync@{{sink}}.service{%endfor%}{%endfor%}{% for sink in audio.virtual_outputs %} shairport-sync@{{sink.name}}.service{% endfor %}
+
+[Install]
+WantedBy=multi-user.target

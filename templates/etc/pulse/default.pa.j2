@@ -1,5 +1,7 @@
 #!/usr/bin/pulseaudio -nF
-#
+
+# This file is managed by Ansible.
+
 # This file is part of PulseAudio.
 #
 # PulseAudio is free software; you can redistribute it and/or modify it
@@ -38,7 +40,7 @@ load-module module-augment-properties
 .endif
 
 ### Load audio drivers statically
-{% for card in cards %}
+{% for card in audio.cards %}
 {% if audio.backend == "alsa" %}
 load-module module-alsa-sink device={{card.name}} tsched=0
 {% endif %}
@@ -65,27 +67,27 @@ set-card-profile alsa_card.{{card.name}} {{card.profile}}
 {% endif %}
 
 # Split cards into multiple virtual stereo sinks
-{% for card in cards %}
+{% for card in audio.cards %}
 {% for output in card.outputs %}
 {% if audio.backend == "alsa" %}
 load-module module-remap-sink sink_name={{output}} sink_properties="device.description='{{output}}'" remix=no master=alsa_output.{{card.name}} channels=2 channel_map=front-left,front-right master_channel_map={{
 ['front-left','front-right','rear-left','rear-right','front-center','lfe','side-left','side-right'][loop.index0 * 2]}},{{['front-left','front-right','rear-left','rear-right','front-center','lfe','side-left','side-right'][loop.index0 * 2 + 1]}}
-{% if card == cards[0] and output == cards[0].outputs[0] %}
-set-default-sink {{cards[0].outputs[0]}}
+{% if card == audio.cards[0] and output == audio.cards[0].outputs[0] %}
+set-default-sink {{audio.cards[0].outputs[0]}}
 {% endif %}
 {% endif %}
 {% if audio.backend == "pulse" %}
 load-module module-remap-sink sink_name={{output}} sink_properties="device.description='{{output}}'" remix=no master={{card.name}} channels=2 channel_map=front-left,front-right master_channel_map={{
 ['front-left','front-right','rear-left','rear-right','front-center','lfe','side-left','side-right'][loop.index0 * 2]}},{{['front-left','front-right','rear-left','rear-right','front-center','lfe','side-left','side-right'][loop.index0 * 2 + 1]}}
-{% if card == cards[0] and output == cards[0].outputs[0] %}
-set-default-sink {{cards[0].outputs[0]}}
+{% if card == audio.cards[0] and output == audio.cards[0].outputs[0] %}
+set-default-sink {{audio.cards[0].outputs[0]}}
 {% endif %}
 {% endif %}
 {% endfor %}
 {% endfor %}
 
 # create virtual sinks that direct to more than one actual sink
-{% for output in virtual_outputs %}
+{% for output in audio.virtual_outputs %}
 load-module module-combine-sink sink_name="{{ output.name }}" sink_properties="device.description='{{output.name}} ({{output.combining | join(" + ")}})'" slaves="{{ output.combining | join(",") }}" channels=2
 {% endfor %}
 
@@ -109,12 +111,9 @@ load-module module-bluetooth-discover
 {{ c.command }} {{ c.name }} {{ c.args }}
 {% endfor %}
 
-### Network access (may be configured with paprefs, so leave this commented
-### here if you plan to use paprefs)
-#load-module module-esound-protocol-tcp
 
 ### Load the RTP receiver module (also configured via paprefs, see above)
-#load-module module-rtp-recv
+load-module module-rtp-recv
 
 ### Load the RTP sender module (also configured via paprefs, see above)
 #load-module module-null-sink sink_name=rtp format=s16be channels=2 rate=44100 sink_properties="device.description='RTP Multicast Sink'"
@@ -171,6 +170,3 @@ load-module module-snap-policy
 ### loading modules and rerouting streams.
 load-module module-filter-heuristics
 load-module module-filter-apply
-
-### Make some devices default
-# set-default-source input

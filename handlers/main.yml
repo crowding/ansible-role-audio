@@ -60,3 +60,10 @@
     - "restart pulseaudio"
     - "reload systemd"
     - "reload alsa"
+- name: "restart gmrender"
+  become: yes
+  systemd:
+    name: "gmrender-resurrect.target"
+    state: restarted
+  listen:
+    - "restart gmrender"

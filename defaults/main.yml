@@ -1,7 +1,11 @@
+---
+audio: {}
 
-audio:
+audio_defaults:
   bluetooth_rx: no # support acting like a bluetooth speaker
   bluetooth_tx: no # support transmitting to bluetooth speakers
+  airplay: yes     # support acting as several Airplay receivers
+  dlna: yes        # act as several DLNA receivers
   sample_rate: 48000
   backend: "pulse" # what userspace lib gets to talk to the card.
   pulse_splits: no # when the backend is not pulse, does Pulse send
@@ -11,15 +15,20 @@ audio:
   airplay_lowest_port: 5000
 
   pulse_daemon_conf:
-    high-priority: "no"
+    exit-idle-time: 0
+    high-priority: "yes"
     nice-level: -11
     realtime-scheduling: "yes"
     realtime-priority: 5
     flat-volumes: no
-    resample-method: speex-float-1
+    resample-method: speex-float-10
     deferred-volume-safety-margin-usec: 10
 
   pulse_default_pa:
+    - command: load-module
+      name: "module-raop-sink"
+      server: "garage"
+      args: ""
     - command: load-module
       name: "module-native-protocol-tcp"
       args: "auth-ip-acl=127.0.0.1;10.0.0.0/24;192.168.0.0/24 auth-anonymous=1"
@@ -29,7 +38,16 @@ audio:
     - command: load-module
       name: "module-zeroconf-publish"
       args: ""
-
+    - command: load-module
+      name: "module-http-protocol-tcp"
+      args: ""
+    - command: load-module
+      name: "module-cli-protocol-tcp"
+      args: ""
+    - command: load-module
+      name: "module-cli-protocol-unix"
+      args: ""
+      
   pulse_client_conf:
     autospawn: "no"
     default-server: "unix:/tmp/pulse-server"

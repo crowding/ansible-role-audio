@@ -1,0 +1,9 @@
+# This file is managed by Ansible.
+
+## Configuration file for PulseAudio clients. See pulse-client.conf(5) for
+## more information. Default values are commented out.  Use either ; or # for
+## commenting.
+
+{% for key, value in audio.pulse_client_conf.items() %}
+{{key}} = {{value}}
+{% endfor %}

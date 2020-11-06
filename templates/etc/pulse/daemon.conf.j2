@@ -1,3 +1,5 @@
+# This file is managed by Ansible.
+
 default-sample-rate = {{audio.sample_rate}}
 {% for key, value in (audio.pulse_daemon_conf).items() %}
 {{key}} = {{value}}

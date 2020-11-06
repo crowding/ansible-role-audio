@@ -1,0 +1,75 @@
+---
+- name: install packages
+  become: yes
+  apt: 
+    name:
+    - build-essential
+    - autoconf
+    - automake
+    - libtool
+    - pkg-config
+    - libupnp-dev
+    - libgstreamer1.0-dev
+    - gstreamer1.0-plugins-base
+    - gstreamer1.0-plugins-good
+    - gstreamer1.0-plugins-bad
+    - gstreamer1.0-plugins-ugly
+    - gstreamer1.0-libav
+    - gstreamer1.0-tools
+    - gstreamer1.0-pulseaudio
+    - uuid-runtime
+    state: present
+- name: create worktree
+  become: yes
+  file:
+    path: "/usr/local/src/gmrender-resurrect/"
+    state: directory
+    owner: "{{ansible_user}}"
+- name: git clone gmrender
+  git:
+    repo: "https://github.com/hzeller/gmrender-resurrect.git"
+    dest: "/usr/local/src/gmrender-resurrect/"
+- name: autogen
+  command:
+    cmd: "./autogen.sh"
+    chdir: "/usr/local/src/gmrender-resurrect/"
+    creates: "/usr/local/src/gmrender-resurrect/configure"
+- name: configure
+  command:
+    cmd: "./configure"
+    chdir: "/usr/local/src/gmrender-resurrect/"
+    creates: "/usr/local/src/gmrender-resurrect/Makefile"
+- name: make
+  command:
+    cmd: "make"
+    chdir: "/usr/local/src/gmrender-resurrect/"
+    creates: "/usr/local/src/gmrender-resurrect/src/gmediarender"
+- name: allow gmediarender to talk to pulse
+  become: yes
+  user:
+    name: "gmrender"
+    groups:
+      - "pulse-access"
+      - "audio"
+    append:
+      yes
+- name: make systemd worker
+  become: yes
+  copy:
+    src: "etc/systemd/system/gmrender-resurrect@.service"
+    dest: "/etc/systemd/system/gmrender-resurrect@.service"
+  notify: "reload systemd"
+- name: make target item
+  become: yes
+  template:
+    src: "etc/systemd/system/gmrender-resurrect.target.j2"
+    dest: "/etc/systemd/system/gmrender-resurrect.target"
+  notify: "reload systemd"
+- name: write worker environment vars
+  become: yes
+  template:
+    src: "etc/default/gmrender-resurrect.j2"
+    dest: "/etc/default/gmrender-resurrect"
+  notify: "restart gmrender"
+  
+# {{lookup('file', '/sys/class/net/net/eth0/address') }}

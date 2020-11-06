@@ -184,7 +184,7 @@ like,
 where the 'cardN' is dynamically assigned. 
 
 
-Using this information, you can now write a file names something like
+Using this information, you can now write a file named something like
 `/etc/udev/rules.d/39-audio.rules` which would look something like
 this (here with one 5.1-channel and one 7.1-channel USB adapters that both look
 identical to udev)
@@ -868,9 +868,27 @@ connect?
 
 ## Miracast
 
+Miracast has been deprecated in favor of chromecast?
+
 I believe the nearest Windows/Android/Linux equiavlent to Airplay is
 Miracast. So let's see if we can set that one up too. There's
 [MiracleCast][] which might be for doing screencasting? for just
 audio, there's
 
 [miraclecast]: https://github.com/albfan/miraclecast
+
+## DLNA rendering
+
+`[gmrender-resurrect][]` is a DLNA renderer for Unix. Install following [these instructions][] and [also these][]
+[gmrender-resurrect]: https://github.com/hzeller/gmrender-resurrect/
+[these instructions]: http://blog.scphillips.com/posts/2014/05/playing-music-on-a-raspberry-pi-using-upnp-and-dlna-v3/
+[also these]: https://rootprompt.apatsch.net/2013/03/07/raspberry-pi-network-audio-player-pulseaudio-dlna-and-bluetooth-a2dp-part-2-dlna/
+
+Example command line:
+
+    /usr/local/src/gmrender-resurrect/src/gmediarender -f "living_room" -u "92cc7113-d3e4-459f-a67c-e8e9bdc951d8" --gstout-audiosink=pulsesink --gstout-audiodevice=lab --logfile=/dev/stdout
+
+So I should be able to go to my Windows Media player and cast a track to gstreamer. This gives:
+
+    ERROR [2020-11-01 04:35:09.582136 | gstreamer] sink: Error: Failed to connect: Access denied (Debug: pulsesink.c(614): gst_pulseringbuffer_open_device (): /GstPulseSink:sink)
+

@@ -1,0 +1,2 @@
+---
+audio: "{{audio_defaults | combine(audio_cfg, recursive=True)}}"

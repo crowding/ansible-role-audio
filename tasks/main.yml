@@ -1,7 +1,7 @@
 - name: configure udev
   become: yes
   template:
-    src: "udev_rules.j2"
+    src: "etc/udev/rules.d/39-audio.rules.j2"
     dest: "/etc/udev/rules.d/39-audio.rules"
   notify: "reload udev rules"
 - name: install packages
@@ -10,40 +10,51 @@
     name:
     - avahi-daemon
     - pulseaudio-module-zeroconf
-    # - pulse-audio-x11
-    - shairport-sync
     - pulsemixer
     - pulseaudio-utils
     state: present
-- name: asound conf
+- name: allow Ansible user access to audio
+  become: yes
+  user:
+    name: "{{ansible_user}}"
+    groups:
+      - "pulse-access"
+      - "pulse"
+      - "audio"
+    append: yes
+- name: write asound conf
   become: yes
   template:
-    src: "asound_conf.j2"
+    src: "etc/asound.conf.j2"
     dest: "/etc/asound.conf"
   notify:
     - "reload alsa"
 - name: write pulseaudio daemon.conf
   become: yes
   template:
-    src: "pulseaudio_daemon_conf.j2"
+    src: "etc/pulse/daemon.conf.j2"
     dest: "/etc/pulse/daemon.conf"
   notify: "restart pulseaudio"
 - name: write pulseaudio client conf
   become: yes
   template:
-    src: "pulseaudio_client.conf.j2"
+    src: "etc/pulse/client.conf.j2"
     dest: "/etc/pulse/client.conf"
   notify: "restart shairport"
+- name: set up DLNA renderer
+  include_tasks:
+    file: gmrender.yml
+  when: audio.dlna
 - name: bluetooth
   import_tasks: "bluetooth.yml"
   when: audio.bluetooth_rx or audio.bluetooth_tx
 - name: write pulseaudio default.pa
   become: yes
   template:
-    src: "pulse_default.pa.j2"
+    src: "etc/pulse/default.pa.j2"
     dest: "/etc/pulse/default.pa"
   notify: "restart pulseaudio"
-- name: remove pulseaudio user service entries
+- name: remove distro service entries
   become: yes
   file:
     path: "{{item}}"
@@ -53,49 +64,20 @@
     - "/usr/lib/systemd/user/pulseaudio.socket"
     - "/etc/systemd/user/default.target.wants/pulseaudio.service"
     - "/etc/systemd/user/sockets.target.wants/pulseaudio.socket"
-    - "/etc/init.d/shairport-sync"
   notify: "reload systemd"
 - name: make pulseaudio systemd service
   become: yes
   copy:
-    src: "{{item.src}}"
-    dest: "{{item.dest}}"
+    src: "{{item}}"
+    dest: "/{{item}}"
   loop:
-    - {src: "pulseaudio.service", dest: "/etc/systemd/system/pulseaudio.service"}
-    - {src: "pulseaudio.socket", dest: "/etc/systemd/system/pulseaudio.socket"}
+    -  "etc/systemd/system/pulseaudio.service"
+    -  "etc/systemd/system/pulseaudio.socket"
   notify: "reload systemd"
-- name: "disable single shairport service"
-  become: yes
-  ignore_errors: yes
-  systemd:
-    name: "shairport-sync.service"
-    state: stopped
-    enabled: no
-- name: configure shairport-sync
-  become: yes
-  template:
-    src: shairport_default.j2
-    dest: "/etc/default/shairport-sync"
-  notify: "restart shairport"
-- name: allow shairport to talk to pulse
-  become: yes
-  user:
-    name: "shairport-sync"
-    groups:
-      - "pulse-access"
-      - "audio"
-- name: make shairport systemd worker
-  become: yes
-  copy:
-    src: "shairport-sync@.service"
-    dest: "/etc/systemd/system/shairport-sync@.service"
-  notify: "reload systemd"
-- name: make shairport target item
-  become: yes
-  template:
-    src: "shairport-sync.target.j2"
-    dest: "/etc/systemd/system/shairport-sync.target"
-  notify: "reload systemd"
+- name: set up airplay service
+  include_tasks:
+    file: airplay.yml
+  when: audio.airplay
 - meta: flush_handlers
 - name: enable multi shairport
   become: yes

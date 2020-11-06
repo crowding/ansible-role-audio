@@ -1,0 +1,18 @@
+[Unit]
+Description=gmrender-resurrect service on %i
+After=network.target sound.target pulseaudio.service avahi-daemon.service
+Requires=pulseaudio.service
+Requires=avahi-daemon.service
+PartOf=gmrender-resurrect.target
+
+[Service]
+Type=simple
+Restart=always
+Environment="UPNP_DEVICE_NAME=%i"
+EnvironmentFile=-/etc/default/gmrender-resurrect
+ExecStart=/usr/local/gmediarender $DAEMON_ARGS_%i
+User=gmediarender
+Group=gmediarender
+
+[Install]
+WantedBy=multi-user.target

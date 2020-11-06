@@ -1,0 +1,14 @@
+# This file is managed by Ansible.
+
+# Defaults for gmrender-resurrect initscript
+# used by /lib/systemd/system/gmrender-resurrect@.service
+
+DAEMON_ARGS="-f {{ audio.cards[0].outputs[0] }} --gstout-audiosink=pulsesink --gstout-audiodevice='{{ audio.cards[0].outputs[0] }}' --logfile=/dev/stdout"
+{% for card in audio.cards %}
+{% for sink in card.outputs %}
+DAEMON_ARGS_{{sink}}="-f {{ sink }} --gstout-audiosink=pulsesink --gstout-audiodevice={{ sink }} --logfile=/dev/stdout"
+{% endfor %}
+{% endfor %}
+{% for sink in audio.virtual_outputs %}
+DAEMON_ARGS_{{sink.name}}="-f {{ sink.name }} --gstout-audiosink=pulsesink --gstout-audiodevice={{ sink.name }} --logfile=/dev/stdout"
+{% endfor %}

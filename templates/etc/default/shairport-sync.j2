@@ -1,18 +1,20 @@
+# This file is managed by Ansible.
+
 # Defaults for shairport-sync initscript
 # sourced by /etc/init.d/shairport-sync
 # and /lib/systemd/system/shairport-sync.service
 # installed at /etc/default/shairport-sync by the maintainer scripts
 
 # Additional options that are passed to the Daemon.
-DAEMON_ARGS="-o alsa -a {{ cards[0].outputs[0] }} -p {{ audio.airplay_lowest_port }} -- -d {{ cards[0].outputs[0] }}"
+DAEMON_ARGS="-o alsa -a {{ audio.cards[0].outputs[0] }} -p {{ audio.airplay_lowest_port }} -- -d {{ audio.cards[0].outputs[0] }}"
 {% set port = namespace(value=audio.airplay_lowest_port) %}
-{% for card in cards %}
+{% for card in audio.cards %}
 {% for sink in card.outputs %}
 DAEMON_ARGS_{{sink}}="-o alsa -a {{ sink }} -p {{ port.value }} -- -d {{ sink }}"
 {% set port.value = port.value + 1 %}
 {% endfor %}
 {% endfor %}
-{% for sink in virtual_outputs %}
+{% for sink in audio.virtual_outputs %}
 DAEMON_ARGS_{{sink.name}}="-o alsa -a {{ sink.name }} -p {{ port.value }} -- -d {{ sink.name }}"
 {% set port.value = port.value + 1 %}
 {% endfor %}

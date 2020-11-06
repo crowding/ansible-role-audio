@@ -1,0 +1,6 @@
+[Unit]
+Description=gmrender-resurrect Workers
+Requires={% for card in audio.cards %}{% for sink in card.outputs %} gmrender-resurrect@{{sink}}.service{%endfor%}{%endfor%}{% for sink in audio.virtual_outputs %} gmrender-resurrect@{{sink.name}}.service{% endfor %}
+
+[Install]
+WantedBy=multi-user.target
