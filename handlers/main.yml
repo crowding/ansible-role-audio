@@ -25,6 +25,11 @@
   systemd:
     daemon_reload: yes
   listen: "reload systemd"
+- name: "reload systemd"
+  become: yes
+  systemd:
+    daemon_reload: yes
+  listen: "load systemd"
 - name: check if pulseaudio running
   command: "pulseaudio --check"
   register: pa_running

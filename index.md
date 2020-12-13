@@ -830,8 +830,8 @@ a [template service][].
 I implemented this by first defining an array of arguments in
 `/etc/default/shairport_sync`. I created a file
 `/etc/systemd/system/shairport-sync@.service` which was a copy of the original
-file. The `@` at the end means systemd treats it as a template, so
-that when you run
+file. The `@` at the end means `systemd` treats it as a template, so
+that when you run,
 
     systemctl daemon-reload 
     systemctl start shairport-sync@cave
@@ -858,26 +858,10 @@ errors:
 This did not happen when running shairport-sync manually. This may be
 because the service is running as the "shairport-sync" user while the
 daemon is running as my login user. It needs to have permissions to
-talk to pulseaudio as that user.
+talk to pulseaudio as that user. [See above][#permissions].
 
-I implemented the suggestions [here] to no effect. Perhaps the ALSA
-pulse plugin doesn't read pulse client.conf. How is ALSA trying to
-connect?
 
--- [see above][#permissions].
-
-## Miracast
-
-Miracast has been deprecated in favor of chromecast?
-
-I believe the nearest Windows/Android/Linux equiavlent to Airplay is
-Miracast. So let's see if we can set that one up too. There's
-[MiracleCast][] which might be for doing screencasting? for just
-audio, there's
-
-[miraclecast]: https://github.com/albfan/miraclecast
-
-## DLNA rendering
+## DLNA/uPNP rendering
 
 `[gmrender-resurrect][]` is a DLNA renderer for Unix. Install following [these instructions][] and [also these][]
 [gmrender-resurrect]: https://github.com/hzeller/gmrender-resurrect/
@@ -892,3 +876,94 @@ So I should be able to go to my Windows Media player and cast a track to gstream
 
     ERROR [2020-11-01 04:35:09.582136 | gstreamer] sink: Error: Failed to connect: Access denied (Debug: pulsesink.c(614): gst_pulseringbuffer_open_device (): /GstPulseSink:sink)
 
+After I futzed with some group settings, I tried again.
+
+## Giving PulseAudio realtime privileges
+
+I've configured high priority and/or realtime mode in `/etc/pulse/daemon.conf`.
+
+In logs, I saw
+
+    pulseaudio[5022]: Failed to acquire real-time scheduling: Permission denied
+
+This means that the package `rtkit` must be installed. Now: 
+
+    Nov  6 09:24:44 localhost systemd[1]: Started RealtimeKit Scheduling Policy Service.
+    Nov  6 09:24:44 localhost rtkit-daemon[5023]: Successfully called chroot.
+    Nov  6 09:24:44 localhost rtkit-daemon[5023]: Successfully dropped privileges.
+    Nov  6 09:24:44 localhost rtkit-daemon[5023]: Successfully limited resources.
+    Nov  6 09:24:44 localhost rtkit-daemon[5023]: Canary thread running.
+    Nov  6 09:24:44 localhost rtkit-daemon[5023]: Running.
+    Nov  6 09:24:44 localhost rtkit-daemon[5023]: Failed to make ourselves RT: Operation not permitted
+    Nov  6 09:24:44 localhost pulseaudio[5022]: Failed to acquire high-priority scheduling: Permission denied
+    Nov  6 09:24:45 localhost pulseaudio[5022]: Failed to acquire real-time scheduling: Permission denied
+
+So some [permissions][] are required. In a file `/etc/security/limits.d/audio.conf` write:
+[permissions]: https://jackaudio.org/faq/linux_rt_config.html
+
+    @audio   -  nice       -20
+    @audio   -  rtprio     95
+    @audio   -  memlock    unlimited
+
+This setting _should_ take effect for future logins. To see if these changes took effect, 
+start a new login and run:
+
+    peter@speakers:~$ ulimit -e -r -l
+    scheduling priority             (-e) 40
+    real-time priority              (-r) 95
+    max locked memory       (kbytes, -l) unlimited
+
+But I do not see that when running 
+the program `rtkit-test` as a user in the `audio` group:
+
+    $ groups
+    sudo audio pulse pulse-access bluetooth
+    
+    $ /usr/libexec/installed-tests/rtkit/rtkit-test
+    Max realtime priority is: 20
+    Min nice level is: -15
+    Rttime limit is: 200000 ns
+    before:
+	    SCHED_RESET_ON_FORK: no
+	    SCHED_OTHER with nice level: 0
+    Failed to become high priority: Permission denied
+    after high priority:
+	    SCHED_RESET_ON_FORK: no
+	    SCHED_OTHER with nice level: 0
+    Failed to become realtime: Permission denied
+    after realtime:
+	    SCHED_RESET_ON_FORK: no
+	    SCHED_OTHER with nice level: 0
+
+I don't know why it's failing to become high priority. I can manually run nice:
+
+    $ nice -n -10 ps -o user,pid,args,rtprio,ni,pri
+    USER       PID COMMAND                     RTPRIO  NI PRI
+    peter    12284 -bash                            -   0  19
+    peter    17419 ps -o user,pid,args,rtprio,      - -10  29
+
+Now, I tried to restart rtkit-daemon, 
+
+    $ sudo rtkitctl -k && sudo rtkitctl --start
+
+and I saw this in syslog:
+
+    Nov  8 00:29:55 localhost rtkit-daemon[17977]: Failed to make ourselves RT: Operation not permitted
+
+So `rtkit-daemon` itself is failing to make itself realtime. Which user is rtkit-daemon running under? Or does `systemd` need to be rebooted so that the ulimit applies to daemons it starts?
+
+    $ dpkg-query -L rtkit
+    ...
+    /lib/systemd/system/rtkit-daemon.service
+    $ cat /lib/systemd/system/rtkit-daemon.service
+    ....
+    CapabilityBoundingSet=CAP_SYS_NICE CAP_DAC_READ_SEARCH CAP_SYS_CHROOT CAP_SETGID CAP_SETUID
+
+Hmm. so it's setting these process capabilities.
+
+    # ps -e | grep rtkit
+    17977 ?        00:00:00 rtkit-daemon
+    # getpcaps 17977
+    17977: = cap_dac_read_search,cap_sys_nice+ep
+ 
+ So it's has `cap_sys_nice`. What do we do with a  

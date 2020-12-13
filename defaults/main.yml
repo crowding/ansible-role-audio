@@ -16,9 +16,9 @@ audio_defaults:
 
   pulse_daemon_conf:
     exit-idle-time: 0
-    high-priority: "yes"
+    high-priority: yes
     nice-level: -11
-    realtime-scheduling: "yes"
+    realtime-scheduling: yes
     realtime-priority: 5
     flat-volumes: no
     resample-method: speex-float-10
@@ -46,6 +46,12 @@ audio_defaults:
       args: ""
     - command: load-module
       name: "module-cli-protocol-unix"
+      args: ""
+    - command: load-module
+      name: "module-null-sink"
+      args: ""
+    - command: load-module
+      name: "module-rtp-recv"
       args: ""
       
   pulse_client_conf:

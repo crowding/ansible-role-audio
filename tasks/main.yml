@@ -12,6 +12,7 @@
     - pulseaudio-module-zeroconf
     - pulsemixer
     - pulseaudio-utils
+    - rtkit
     state: present
 - name: allow Ansible user access to audio
   become: yes
@@ -22,6 +23,13 @@
       - "pulse"
       - "audio"
     append: yes
+- name: allow realtime mode
+  become: yes
+  copy:
+    src: "etc/security/limits.d/audio.conf"
+    dest: "/etc/security/limits.d/audio.conf"
+  when: audio.pulse_daemon_conf["realtime-scheduling"] is true
+  notify: "restart pulseaudio"
 - name: write asound conf
   become: yes
   template:

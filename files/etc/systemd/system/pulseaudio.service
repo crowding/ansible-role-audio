@@ -20,7 +20,7 @@ User=pulse
 Group=audio
 # make /var/run/pulse for temp files
 RuntimeDirectory=pulse
-ExecStart=/usr/bin/pulseaudio --daemonize=no --log-target=journal
+ExecStart=/usr/bin/pulseaudio --daemonize=no --log-target=journal # --log-level=4
 LockPersonality=yes
 MemoryDenyWriteExecute=yes
 NoNewPrivileges=yes
