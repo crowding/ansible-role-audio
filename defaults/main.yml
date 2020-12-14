@@ -2,16 +2,17 @@
 audio: {}
 
 audio_defaults:
-  bluetooth_rx: no # support acting like a bluetooth speaker
-  bluetooth_tx: no # support transmitting to bluetooth speakers
-  airplay: yes     # support acting as several Airplay receivers
-  dlna: yes        # act as several DLNA receivers
+  compile_kernel: no # compile a kernel if the running kernel doesn't have preempt
+  bluetooth_rx: no   # support acting like a bluetooth speaker
+  bluetooth_tx: no   # support transmitting to bluetooth speakers
+  airplay: yes       # support acting as several Airplay receivers
+  dlna: yes          # act as several DLNA receivers
   sample_rate: 48000
-  backend: "pulse" # what userspace lib gets to talk to the card.
-  pulse_splits: no # when the backend is not pulse, does Pulse send
-                   # separate streams for each virtual output (yes) or
-                   # does Pulse make a multichannel stream for each
-                   # card (no)
+  backend: "pulse"   # what userspace lib gets to talk to the card.
+  pulse_splits: no   # when the backend is not pulse, does Pulse send
+                     # separate streams for each virtual output (yes) or
+                     # does Pulse make a multichannel stream for each
+                     # card (no)
   airplay_lowest_port: 5000
 
   pulse_daemon_conf:

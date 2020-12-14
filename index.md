@@ -878,6 +878,14 @@ So I should be able to go to my Windows Media player and cast a track to gstream
 
 After I futzed with some group settings, I tried again.
 
+## Compiling a realtime kernel
+
+It appears that I do not have a realtime kernel:
+
+
+
+# TODO
+
 ## Giving PulseAudio realtime privileges
 
 I've configured high priority and/or realtime mode in `/etc/pulse/daemon.conf`.
@@ -886,14 +894,8 @@ In logs, I saw
 
     pulseaudio[5022]: Failed to acquire real-time scheduling: Permission denied
 
-This means that the package `rtkit` must be installed. Now: 
+This means that the package `rtkit` must be installed. But this is happening:
 
-    Nov  6 09:24:44 localhost systemd[1]: Started RealtimeKit Scheduling Policy Service.
-    Nov  6 09:24:44 localhost rtkit-daemon[5023]: Successfully called chroot.
-    Nov  6 09:24:44 localhost rtkit-daemon[5023]: Successfully dropped privileges.
-    Nov  6 09:24:44 localhost rtkit-daemon[5023]: Successfully limited resources.
-    Nov  6 09:24:44 localhost rtkit-daemon[5023]: Canary thread running.
-    Nov  6 09:24:44 localhost rtkit-daemon[5023]: Running.
     Nov  6 09:24:44 localhost rtkit-daemon[5023]: Failed to make ourselves RT: Operation not permitted
     Nov  6 09:24:44 localhost pulseaudio[5022]: Failed to acquire high-priority scheduling: Permission denied
     Nov  6 09:24:45 localhost pulseaudio[5022]: Failed to acquire real-time scheduling: Permission denied
@@ -902,7 +904,7 @@ So some [permissions][] are required. In a file `/etc/security/limits.d/audio.co
 [permissions]: https://jackaudio.org/faq/linux_rt_config.html
 
     @audio   -  nice       -20
-    @audio   -  rtprio     95
+    @audio   -  rtprio     20
     @audio   -  memlock    unlimited
 
 This setting _should_ take effect for future logins. To see if these changes took effect, 
@@ -965,5 +967,67 @@ Hmm. so it's setting these process capabilities.
     17977 ?        00:00:00 rtkit-daemon
     # getpcaps 17977
     17977: = cap_dac_read_search,cap_sys_nice+ep
- 
- So it's has `cap_sys_nice`. What do we do with a  
+
+So it has `cap_sys_nice`.
+
+But I still can't run the test.
+
+Well, [this page][] suggested sticking something in`/etc/security/limits.conf`. In that file:
+[this page]: https://forums.opensuse.org/showthread.php/400774-Pulseaudio-Can-t-get-realtime-or-high-priority-permissions
+
+    @audio          -       rtprio          99
+    @audio          -       nice            -20
+    @audio          -       memlock         4000000
+    rtkit          -       rtprio          99
+    rtkit          -       nice            -20
+    rtkit          -       memlock         4000000
+    
+But I'm in audio group, and rtkit-daemon is still not testing out:
+
+    Dec 13 06:44:33 localhost rtkit-daemon[10343]: Failed to make ourselves RT: Operation not permitted
+
+When I run `rtkit-test`, the logs show this is launching `rtkit-daemon` on demand.
+[Another thread][at] pointed out that this happens on its own user. Indeed: 
+[at]: https://bbs.archlinux.org/viewtopic.php?id=230079
+
+    $ getent passwd rtkit
+    rtkit:x:120:131:RealtimeKit,,,:/proc:/usr/sbin/nologin
+
+So that group needs permissions too, which I added. (above). I also added rtkit to group `audio` if that helps (it didn't)
+
+Yet no dice. I am still not getting any joy from rtkit-test.
+
+Oops. It seems my kernel does not have realtime:
+
+    :~$ grep PREEMPT /boot/config-5.8.6-sunxi
+    CONFIG_PREEMPT_NONE=y
+    # CONFIG_PREEMPT_VOLUNTARY is not set
+    # CONFIG_PREEMPT is not set
+    # CONFIG_PREEMPTIRQ_DELAY_TEST is not set
+
+---
+
+This doesn't help with rtkit-test yet, but one other thing this might
+have told me is that when you're running as a systemd service, that
+systemd controls your realtime and nice level. This is configured in
+`/etc/systemd/pulseaudio.service`:
+
+```
+AmbientCapabilities=CAP_SYS_NICE
+RestrictRealtime=no
+IOSchedulingClass="{%if pulse_daemon_conf['realtime-scheduling'] %}realtime{% else %}{% endif %}"
+IOSchedulingPriority={{pulse_daemon_conf['realtime-priority']}}
+CPUSchedulingPolicy=rr
+CPUSchedulingPriority={{pulse_daemon_conf['realtime-priority']}}
+Nice={{pulse_daemon_conf['nice-level']}}
+```
+
+But `systemd` threw this error:
+
+```
+Dec 13 06:05:23 localhost systemd[1540]: pulseaudio.service: Failed at step SETSCHEDULER spawning /usr/bin/pulseaudio: Operation not permitted
+Dec 13 06:05:23 localhost systemd[1]: pulseaudio.service: Main process exited, code=exited, status=214/SETSCHEDULER
+```
+
+So I need more capabilities.
+

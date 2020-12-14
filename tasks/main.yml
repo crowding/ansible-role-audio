@@ -12,7 +12,6 @@
     - pulseaudio-module-zeroconf
     - pulsemixer
     - pulseaudio-utils
-    - rtkit
     state: present
 - name: allow Ansible user access to audio
   become: yes
@@ -24,12 +23,12 @@
       - "audio"
     append: yes
 - name: allow realtime mode
-  become: yes
-  copy:
-    src: "etc/security/limits.d/audio.conf"
-    dest: "/etc/security/limits.d/audio.conf"
+  tags: realtime
+  include_tasks:
+    file: realtime.yml
+    apply:
+      tags: realtime
   when: audio.pulse_daemon_conf["realtime-scheduling"] is true
-  notify: "restart pulseaudio"
 - name: write asound conf
   become: yes
   template:
@@ -79,8 +78,8 @@
     src: "{{item}}"
     dest: "/{{item}}"
   loop:
-    -  "etc/systemd/system/pulseaudio.service"
-    -  "etc/systemd/system/pulseaudio.socket"
+    - "etc/systemd/system/pulseaudio.socket"
+    - "etc/systemd/system/pulseaudio.service"
   notify: "reload systemd"
 - name: set up airplay service
   include_tasks:
