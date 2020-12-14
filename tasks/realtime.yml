@@ -1,96 +1,15 @@
 ---
 # configure this Armbian device to have a realtime kernel and various permissions.
-- name: check for kernel flags
+- name: check for preempt kernel
   command:
     cmd: "uname -a"
   register: "unamea"
   changed_when: False
 - assert:
     that:
-      - "('PREEMPT' in unamea.stdout) or audio.compile_kernel"
+      - "'PREEMPT' in unamea.stdout"
     fail_msg:
-      "Realtime config requested but kernel is not preemptive and audio_cfg.compile_kernel is not set." 
-- name: compile preempt kernel
-  when: "'PREEMPT' not in unamea.stdout"
-  block:    
-  - name: Find kernel version
-    command:
-      cmd: "uname -r"
-    register: "kernel_version"
-    changed_when: False
-  - name: look for a package matching current kernel version
-    shell: "source /etc/armbian-release && apt-cache --names-only search '^linux-source-{{kernel_version.stdout}}*' | awk '{ print $1 }' | grep -w ${BRANCH}-${LINUXFAMILY}"
-    args:
-      executable: "/bin/bash"
-    register: packages
-    changed_when: False
-  - assert:
-      that:
-        - '(packages.stdout_lines | length) > 0'
-      fail_msg: "Current kernel does not have rt/preempt and could not find corresponding kernel source package."
-  - name: install kernel source
-    become: yes
-    apt:
-      name:
-        - '{{packages.stdout_lines[0]}}'
-        - build-essential
-        - git
-        - gcc
-        - libncurses5-dev
-        - libssl-dev
-      state: present
-  - name: find source archive
-    shell: "dpkg -L {{packages.stdout_lines[0]}} | grep 'tar\\.'"
-    register: kernel_archive
-    changed_when: False
-  - name: find config archive
-    shell: "dpkg -L {{packages.stdout_lines[0]}} | grep 'config.'"
-    register: kernel_config_archive
-    changed_when: False
-  - name: make compile dir
-    file:
-      path: "~/preempt-kernel"
-      state: directory
-  - name: extract kernel source
-    unarchive:
-      remote_src: yes
-      src: "{{kernel_archive.stdout_lines[0]}}"
-      dest: "~/preempt-kernel"
-      creates: "~/preempt-kernel/LICENSES"
-  - name: copy running config
-    shell: "gunzip /proc/config.gz -c > ~/preempt-kernel/.config"
-    # args:
-    #   creates: "~/preempt-kernel/.config"
-  - name: enable preempt kernel
-    lineinfile:
-      path: "~/preempt-kernel/.config"
-      line: "{{item.line}}"
-      regexp: "{{item.pattern}}"
-    with_items:
-      - {pattern: "CONFIG_HIGH_RES_TIMERS", line: "CONFIG_HIGH_RES_TIMERS=y"}
-      - {pattern: "CONFIG_PREEMPT_NONE", line: "# CONFIG_PREEMPT_NONE is not set"}
-      - {pattern: "CONFIG_PREEMPT_VOLUNTARY", line: "# CONFIG_PREEMPT_VOLUNTARY is not set"}
-      - {pattern: "CONFIG_PREEMPT", line: "CONFIG_PREEMPT=y"}
-      - {pattern: "CONFIG_HZ=", line: "CONFIG_HZ=1000"}
-      - {pattern: "CONFIG_HZ_1000", line: "CONFIG_HZ_1000=y"}
-      - {pattern: "CONFIG_HZ_100", line: "# CONFIG_HZ_100 is not set"}
-      - {pattern: "CONFIG_HZ_200", line: "# CONFIG_HZ_200 is not set"}
-      - {pattern: "CONFIG_HZ_250", line: "# CONFIG_HZ_250 is not set"}
-      - {pattern: "CONFIG_HZ_300", line: "# CONFIG_HZ_300 is not set"}
-      - {pattern: "CONFIG_HZ_500", line: "# CONFIG_HZ_500 is not set"}
-  # if changed, clean?
-  - name: finish config
-    command:
-      chdir: "~/preempt-kernel"
-      cmd: "make olddefconfig"
-  # - name: compile kernel
-  #   shell: 'make -j $(nproc)'
-  #   args:
-  #     chdir "~/preempt-kernel"
-  # - name: install kernel image
-  # notify: "restart system"
-  
-# end kernel compile
+      "Realtime config requested but kernel is not preemptive." 
 - name: install rtkit daemon
   apt:
     name: rtkit
