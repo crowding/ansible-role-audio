@@ -9,15 +9,7 @@
     that:
       - "'PREEMPT' in unamea.stdout"
     fail_msg:
-      "Realtime config requested but kernel is not preemptive." 
-- name: install rtkit daemon
-  apt:
-    name: rtkit
-    state: present
-- user:
-    name: rtkit
-    groups: audio
-    append: yes
+      "Realtime config requested but kernel is not preemptive."
 - name: grant realtime permissions to audio group
   become: yes
   copy:
@@ -25,10 +17,5 @@
     dest: "/{{item}}"
   with_items:
     - "etc/security/limits.d/audio.conf"
-    - "etc/security/limits.d/rtkit.conf"
   notify:
     - "reload systemd"
-    - "restart alsa"
-    - "restart rtkit"
-
-# SOURCE_PKG_LIST=$(apt-cache --names-only search ^linux-source-* | awk '{ print $1 }' | grep -w ${BRANCH}-${LINUXFAMILY} | tail -n 5)

@@ -16,7 +16,18 @@ Restart=on-failure
 EnvironmentFile=-/etc/default/shairport-sync
 ExecStart=/usr/bin/shairport-sync $DAEMON_ARGS_%i
 User=shairport-sync
-Group=shairport-sync
+Group=audio
+
+{%if audio.pulse_daemon_conf['realtime-scheduling'] %}
+# LimitRTPRIO=95
+# LimitRTTIME=500000
+LimitNICE=-19
+IOSchedulingClass=realtime
+IOSchedulingPriority=1
+# CPUSchedulingPolicy=rr
+# CPUSchedulingPriority={{audio.pulse_daemon_conf['realtime-priority']}}
+Nice={{audio.pulse_daemon_conf['nice-level']}}
+{% endif %}
 
 [Install]
 WantedBy=multi-user.target

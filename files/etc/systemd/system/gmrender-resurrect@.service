@@ -11,8 +11,8 @@ Restart=always
 Environment="UPNP_DEVICE_NAME=%i"
 EnvironmentFile=-/etc/default/gmrender-resurrect
 ExecStart=/usr/local/gmediarender $DAEMON_ARGS_%i
-User=gmediarender
-Group=gmediarender
+User=gmrender
+Group=gmrender
 
 [Install]
 WantedBy=multi-user.target

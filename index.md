@@ -7,7 +7,7 @@ sharing: true
 footer: true
 ---
 
-# House Multizone Audio system using ARM devboard.
+# House Multizone Audio system using an ARM devboard.
 
 ## Or, how to run a bunch of USB audio DACs at once and serve them over the network
 
@@ -427,19 +427,18 @@ When changing pulse configuration, restart Pulse with the commands
 `pulseaudio -k; pulseaudio -v -D`.
 
 ### Directing Pulse to talk to cards on its own
-    
 
 We can also tell Pulse to talk to kernel ALSA directly. In `default.pa`:
 
     load-module module-udev-detect
-    
+
 might do the trick. If not, we can connect cards manually:
 
     load-module module-alsa-card device_id=surround5 card_name=alsa_card.surround5 rate=48000 sink_name=surround5 tsched=0
 
 If we applied the udev rules above, this should result in seeing the card names set by those rules:
 
-    pacmd list-cards | grep "\(index: \|name: \)" 
+    pacmd list-cards | grep "\(index: \|name: \)"
         index: 0
             name: <alsa_card.platform-hdmi-sound>
         index: 1
@@ -472,6 +471,9 @@ To split a surround sound device into virtual stereo devices, I wrote
 lines like the following in `default.pa`
 
     load-module module-remap-sink sink_name=laundry sink_properties="device.description='laundry'" remix=no master=alsa_output.surround5 channels=2 master_channel_map=front-left,front-right channel_map=rear-left,rear-right
+
+This makes a virtual output named "laundry" that takes a stereo signal
+and redirects it to the
 
 Test with:
 
@@ -545,24 +547,45 @@ To make the Pulse server accept connections over Unix sockets,in `/etc/pulse/def
 
     load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1;10.0.0.0/24;192.168.0.0/24 auth-anonymous=1
     load-module module-native-protocol-unix auth-group=audio socket=/tmp/pulse-server
-    load-module module-zeroconf-publish 
-    
-Then I made a file in `/etc/systemd/system/pulseaudio.service` to start pulseaudio as a daemon:
+    load-module module-zeroconf-publish
+
+Then I made a file in `/etc/systemd/system/pulseaudio.service` to
+start pulseaudio as a daemon:
 
     [Unit]
     Description=Pulse Audio
     Documentation=man:pulseaudio(1)
     After=sound.target
 
-    [Service]  
-    Type=simple  
+    [Service]
+    Type=simple
     ExecStart=/usr/bin/pulseaudio -v
     User=pulse
     Group=audio
 
-Now, PulseAudio offers something called [system mode][], which requires you to start the server as root in multi-user audio setups. And there is [a page about the dire consequences of doing so.][bad idea]. The thing is, I was able to make shairport-sync connect, from one user account, to a pulseaudio daemon running under a different user account, without running in system mode. And I know it's not running in system mode because it's obeying the configuration in `default.pa` and not that in `system.pa`. So it seems like system mode isn't even necessary, in the headless server scenario. `systemd` takes care of daemonizing and insulating pulseaudio in its own user account.
+### system mode is unnecessary
 
-Now, there is already a "user" pulseaudio service defined in `/usr/lib/systemd/user/pulseaudio.service` and `/usr/lib/systemd/user/pulseaudio.socket`. This apparently is how the logged-in user requests a pulseaudio server to start up -- systemd spawns the server on connection to the socket. I wound up deleting the pulseaudio files in `/usr/lib/systemd/user/` (as well as the symlinks that point to them) and creating similar files in `/etc/systemd/system` to define a system service. I found it was _not_ necessary to use pulseaudio's "system mode;" systemd is perfectly capable of starting a program under a daemon account.
+Now, PulseAudio has a setting called [system mode][], which requires
+you to start the server as root in multi-user audio setups. And there
+is [a page about the dire consequences of doing so.][bad idea]. The
+thing is, I was able to make shairport-sync connect, from one user
+account, to a pulseaudio daemon running under a different user
+account, without running in system mode. And I know it's not running
+in system mode because it's obeying the configuration in `default.pa`
+and not that in `system.pa`. So it seems like system mode isn't even
+necessary, in the headless server scenario. `systemd` takes care of
+daemonizing and insulating pulseaudio in its own user account.
+
+Now, there is already a "user" pulseaudio service defined in
+`/usr/lib/systemd/user/pulseaudio.service` and
+`/usr/lib/systemd/user/pulseaudio.socket`. This apparently is how the
+logged-in user requests a pulseaudio server to start up -- systemd
+spawns the server on connection to the socket. I wound up deleting the
+pulseaudio files in `/usr/lib/systemd/user/` (as well as the symlinks
+that point to them) and creating similar files in
+`/etc/systemd/system` to define a system service. Again, I found it
+was _not_ necessary to use pulseaudio's "system mode;" systemd is
+perfectly capable of starting a program under a daemon account.
 
 [system mode]: https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/SystemWide/
 [bad idea]: https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/WhatIsWrongWithSystemWide/
@@ -571,8 +594,8 @@ Now, there is already a "user" pulseaudio service defined in `/usr/lib/systemd/u
 
 Running off of systemd, `shairport-sync` (and other services we might
 add) runs under its own siloed user account.  With the pulse daemon
-running under my main account, I have this when I try to play
-from shairport-sync:
+running under my main account, I have this when I try to play from
+shairport-sync:
 
     Sep 18 03:21:31 localhost shairport-sync[912]: ALSA lib pcm_dmix.c:1052:(snd_pcm_dmix_open) unable to create IPC semaphore
     Sep 18 03:21:31 localhost shairport-sync[912]: alsa: error -13 ("Permission denied") opening alsa device "bedroom".
@@ -593,7 +616,7 @@ it. The fix is to add a couple of `ipc` options to `asound.conf`:
        ....
     }
 
-This makes it so that any user on the local machine can connect. 
+This makes it so that any user on the local machine can connect.
 
 That does it for the individual sinks (which currently use ALSA in a
 way that skips Pulse.) However, when I play to the multiple sinks
@@ -605,7 +628,8 @@ way that skips Pulse.) However, when I play to the multiple sinks
 This error is coming from the Pulse client level (here running from
 the pulse plugin loaded from userspace ALSA.)
 
-Now, the pulse server did not output anything. So the client lib must just be failing to open the pipe?
+Now, the pulse server did not output anything. So the client lib must
+just be failing to open the pipe?
 
 Actually, on restarting the pulse server, I am getting this in the logs:
 
@@ -613,7 +637,35 @@ Actually, on restarting the pulse server, I am getting this in the logs:
     Sep 18 07:56:22 localhost pulseaudio[29068]: Failed to parse module arguments
     Sep 18 07:56:22 localhost pulseaudio[29068]: Failed to load module "module-native-protocol-unix" (argument: "auth_group=audio socket=/tmp/pulse-server"): initialization failed.
 
-This was due to misspelled  options -- dashes, not hyphens.
+This was due to misspelled options -- wherever I copy-pasted from used
+a dash, not a hyphen.
+
+### Pulse is crashing/rebooting over and over
+
+When I connect to Airplay, I see Pulse rebooting itself over and over,
+until eventually it starts playing. This happens when I'm using mpg123
+from the command line, too, so it's not airplay or networking that's
+the problem.
+
+When running pulse as user rather than systemd, running mpg123, it
+doesn't do this?
+
+Next suspect is realtime. What if I disable realtims in pulse daemon,
+still running from systemd? Nope.
+
+Logs show:
+
+    pulseaudio[4791]: We are idle, quitting...
+
+Okay, so I boneheadedly set `exit-idle-time = 0` thinking that would
+disable idle exit (which I saw no need for bc headless server) and
+instead that made it reboot itself several times while it was supposed
+to be negotiating a connection.
+
+
+Nope, still get many reboots running from systemd and using mpg123. How can I monitor what systemd is doing?
+
+Also I 
 
 ## Acting as a Bluetooth sink
 
@@ -745,7 +797,7 @@ have web interfaces to a volume control.
 
 https://github.com/Siot/PaWebControl
 
-# Network audio servers
+# Supporting network audio protocols
 
 ## Airplay via shairport-sync
 
@@ -762,9 +814,9 @@ Run a small instance of shairport-sync with, e.g.:
 
     shairport-sync -o alsa -a lab -p 5000 -- -d lab
 
-Now, I ran into a problem when pulse used libalsa as its backend. Data
-was going from shairport-sync through libalsa to pulse to libalsa
-again. 
+Now, I ran into a problem with this when pulse used libalsa as its
+backend. Data was going from shairport-sync through libalsa to pulse
+to libalsa again and getting stuck, somehow?
 
 I switched to using Pulse to talk directly to kernel alsa and
 configured libalsa to talk to pulse.
@@ -779,20 +831,18 @@ which forwards them back to Alsa. See [above][#relaying-to-pulse].
 But this caused a problem with using shairport-sync. The connection
 kept starting and dropping. Something in the chain of shairport-sync
 -> libalsa -> pulseaudio -> libalsa(again) -> kernel seemed to be
-messing up its
+messing up its.
 
 Using Pulse as the system's backend seemed to improve this; now the chain
 goes shairport-sync -> libalsa -> pulseaudio -> kernel.
 
+### shairport-sync over Pulse
+
 But shairport-sync also uses a pulseaudio backend; that would get
-libalsa the whoel way out of the way.
+libalsa the whole way out of the way.
 
-
-
-### over Pulse
-
-Now, the "pa" backend on shairport-sync accepts no arguments. How do I
-tell it what output to use?
+But, the "pa" backend on shairport-sync accepts no arguments. How do I
+tell it what output to use? Set environment variables that Pulse looks at?
 
 ### running shairport-sync as a service
 
@@ -801,8 +851,7 @@ I placed the desired arguments in `/etc/default/shairport_sync`:
 
     DAEMON_ARGS="-o alsa -a lab -p 5000 -- -d lab"
 
-
-### running several instances of shairport-sync as a service.
+### running several instances of shairport-sync as a service
 
 #### check if your distro uses init.d or systemd
 
@@ -822,8 +871,8 @@ the package, unless you --purge the package. How weird is that?
 
 #### running multiple instances using a template service.
 
-Turns out systemd has a way to handle multiple instances of a daemon, by defining
-a [template service][].
+Turns out systemd has a way to handle multiple instances of a daemon,
+by defining a [template service][].
 
 [template service]: https://www.stevenrombauts.be/2019/01/run-multiple-instances-of-the-same-systemd-unit/
 
@@ -833,7 +882,7 @@ I implemented this by first defining an array of arguments in
 file. The `@` at the end means `systemd` treats it as a template, so
 that when you run,
 
-    systemctl daemon-reload 
+    systemctl daemon-reload
     systemctl start shairport-sync@cave
 
 then `cave` will be substituted for each `%i` in the template.
@@ -876,158 +925,200 @@ So I should be able to go to my Windows Media player and cast a track to gstream
 
     ERROR [2020-11-01 04:35:09.582136 | gstreamer] sink: Error: Failed to connect: Access denied (Debug: pulsesink.c(614): gst_pulseringbuffer_open_device (): /GstPulseSink:sink)
 
-After I futzed with some group settings, I tried again.
+After I futzed with some group settings...
 
-## Compiling a realtime kernel
+##### TODO (gstreamer)
 
-It appears that I do not have a realtime kernel:
+## Eliminating clicks and gaps
 
+Audio requires a lower, more predictable latency from the operating
+system kernel than the server loads Linus thinks of as "real
+workloads." So even though full preemption is baked into the Linux
+kernel, it's
 
+The kenel shipped with Armbian does not have the realtime scheduler
+enabled. To check if your kernel had realtime scheduler, run `uname
+-a`; the word `PREEMPT` should appear in the response.
 
-# TODO
+### Cross compiling a realtime kernel
 
-## Giving PulseAudio realtime privileges
+Armbian wants you to cross-compile kernels using a [toolchain][] that
+runs on x64. This process actually worked pretty smoothly, so I am
+leaving it as a manual step. When the build is done, the `output/debs`
+directory will contain `.deb` packages you can copy over to your ARM
+device and install with `dpkg -i`.
+[toolchain]: https://docs.armbian.com/Developer-Guide_Build-Preparation/
 
-I've configured high priority and/or realtime mode in `/etc/pulse/daemon.conf`.
+In the kernel config menu, the setting you want to enable is
+`CONFIG_PREEMPT=y`. as well as the high resolution timer
+(`CONFIG_CONFIG_HIGH_RES_TIMERS=y`) which was already enabled.
 
-In logs, I saw
+And -- *this one cost me a day or two of frustrated troubleshooting, * --
+-- it seems you need to specifically [disable][]
+`CONFIG_RT_GROUP_SCHED`, unless you want to [jump through][] a whole
+[bunch of hoops][] to put your RT process into a cgroup and give the
+cgroup a priority.
+[disable]: https://forum.armbian.com/topic/16489-config_rt_group_schedy-harmuflull-for-real-time-applications/
+[jump through]: https://stackoverflow.com/a/60665456/1188636
+[bunch of hoops]: https://mjmwired.net/kernel/Documentation/admin-guide/cgroup-v1/cgroups.rst
 
-    pulseaudio[5022]: Failed to acquire real-time scheduling: Permission denied
+If you have `CONFIG_RT_GROUP_SCHED` enabled, all your programs will
+get "permission denied" when they try to enable realtime, and you
+might fruitlessly mass with ulimit and limits.conf but all your
+googling might not turn up that notice that there's a third
+independent security mechanism, "cgroups," in your way. (but we're not
+quite done with [cgroups][]...)
+[cgroups]: https://www.freedesktop.org/wiki/Software/systemd/MyServiceCantGetRealtime/
 
-This means that the package `rtkit` must be installed. But this is happening:
+In Armbian the kernel build process makes `.deb` packages in
+`output/debs`. After installing them, be sure to mark those packages
+to be held, so that a future `apt-get upgrade` doesn't clobber them.
 
-    Nov  6 09:24:44 localhost rtkit-daemon[5023]: Failed to make ourselves RT: Operation not permitted
-    Nov  6 09:24:44 localhost pulseaudio[5022]: Failed to acquire high-priority scheduling: Permission denied
-    Nov  6 09:24:45 localhost pulseaudio[5022]: Failed to acquire real-time scheduling: Permission denied
+    sudo apt-mark hold armbian-config armbian-firmware-full \
+        linux-dtb-current-sunxi linux-headers-current-sunxi \
+        linux-image-current-sunxi linux-source\
+        linux-u-boot-current-orangepiplus2e
 
-So some [permissions][] are required. In a file `/etc/security/limits.d/audio.conf` write:
+Some more tips for optimizing a kernel for low-latency loads are [here][tips].
+[tips]: https://rigtorp.se/low-latency-guide/
+
+Beyond that, if you search for advice on Linux kernel configuration
+you'll see a lot of different advice of different ages. Current advice
+seems to be that changing the scheduling interrupt frequency
+(`CONFIG_HZ_1000`) [doesn't help][HZ-1000] RT processes (though it may
+help reduce jitter in non-RT processes.) The tickless scheduler
+(`CONFIG_NO_HZ_FULL=y`) [may be useful][no-hz], but only if you jump
+through some cpu affinity hoops so that the realtime process has
+exclusive run of a CPU core. (TODO: return to this)
+[HZ-1000]: https://github.com/raboof/realtimeconfigquickscan/issues/4
+[NO-HZ-FULL]: https://www.kernel.org/doc/html/latest/timers/no_hz.html
+
+### Testing the realtime kernel.
+
+[Cyclictest][] is a utility to benchmark the kernel's low latency
+performance. I installed it via `apt-get install rt-tests`. This
+ [guide][] to Linux audio suggests this command line, run as root:
+[cyclictest]: https://wiki.linuxfoundation.org/realtime/documentation/howto/tools/cyclictest/start
+[guide]: https://wiki.linuxaudio.org/wiki/system_configuration#cyclictest
+
+    # cyclictest -t1 -p 80 -i 10000 -l 10 -m
+
+The output doesn't matter yet -- what does matter is that it doesn't
+complain about an "operation not permitted".
+
+### Granting realtime privileges to audio group
+
+When not running as root, `cyclictest` reports:
+
+    WARN: open /dev/cpu_dma_latency: Permission denied
+    FATAL: timerthread-1: failed to set priority to 80
+
+[To fix the "permission" error][permissions], create a file
+`/etc/security/limits.d/audio.conf` with the lines:
 [permissions]: https://jackaudio.org/faq/linux_rt_config.html
 
-    @audio   -  nice       -20
-    @audio   -  rtprio     20
+    @audio   -  rtprio     95      # out of 99
+    @audio   -  nice       -19     # always leave one for root
     @audio   -  memlock    unlimited
 
-This setting _should_ take effect for future logins. To see if these changes took effect, 
-start a new login and run:
+This setting should take effect for future logins.  Check this by
+starting a new login (as a user in the `audio` group) and running
+`ulimit`:
 
     peter@speakers:~$ ulimit -e -r -l
     scheduling priority             (-e) 40
     real-time priority              (-r) 95
     max locked memory       (kbytes, -l) unlimited
 
-But I do not see that when running 
-the program `rtkit-test` as a user in the `audio` group:
+After logging out and logging in again, assuming your user is in the
+`audio` group, `cyclictest` should work.
 
-    $ groups
-    sudo audio pulse pulse-access bluetooth
-    
-    $ /usr/libexec/installed-tests/rtkit/rtkit-test
-    Max realtime priority is: 20
-    Min nice level is: -15
-    Rttime limit is: 200000 ns
-    before:
-	    SCHED_RESET_ON_FORK: no
-	    SCHED_OTHER with nice level: 0
-    Failed to become high priority: Permission denied
-    after high priority:
-	    SCHED_RESET_ON_FORK: no
-	    SCHED_OTHER with nice level: 0
-    Failed to become realtime: Permission denied
-    after realtime:
-	    SCHED_RESET_ON_FORK: no
-	    SCHED_OTHER with nice level: 0
+### Making Pulseaudio use realtime mode;
 
-I don't know why it's failing to become high priority. I can manually run nice:
+I've configured high priority and/or realtime mode in `/etc/pulse/daemon.conf`:
 
-    $ nice -n -10 ps -o user,pid,args,rtprio,ni,pri
-    USER       PID COMMAND                     RTPRIO  NI PRI
-    peter    12284 -bash                            -   0  19
-    peter    17419 ps -o user,pid,args,rtprio,      - -10  29
+    high-priority = True
+    nice-level = -11
+    realtime-scheduling = True
+    realtime-priority = 50
 
-Now, I tried to restart rtkit-daemon, 
+Testing this by starting pulse from a user account should give:
 
-    $ sudo rtkitctl -k && sudo rtkitctl --start
+    I: [alsa-source-USB Audio] util.c: Successfully enabled SCHED_RR scheduling for thread, with priority 9, which is lower than the requested 50.
 
-and I saw this in syslog:
+### Making realtime mode work from systemd service
 
-    Nov  8 00:29:55 localhost rtkit-daemon[17977]: Failed to make ourselves RT: Operation not permitted
+While playing with the `pulseaudio.service` file, I keep a window open
+on syslog and restart with:
 
-So `rtkit-daemon` itself is failing to make itself realtime. Which user is rtkit-daemon running under? Or does `systemd` need to be rebooted so that the ulimit applies to daemons it starts?
+    sudo systemctl stop pulseaudio.socket pulseaudio && sudo systemctl daemon-reload && systemctl start pulseaudio.service
 
-    $ dpkg-query -L rtkit
-    ...
-    /lib/systemd/system/rtkit-daemon.service
-    $ cat /lib/systemd/system/rtkit-daemon.service
-    ....
-    CapabilityBoundingSet=CAP_SYS_NICE CAP_DAC_READ_SEARCH CAP_SYS_CHROOT CAP_SETGID CAP_SETUID
+And I probe the capabilities of the running process like:
 
-Hmm. so it's setting these process capabilities.
+    getpcaps $($FINDPULSE)
+    cat /proc/$($FINDPULSE)/status
 
-    # ps -e | grep rtkit
-    17977 ?        00:00:00 rtkit-daemon
-    # getpcaps 17977
-    17977: = cap_dac_read_search,cap_sys_nice+ep
+One thing I learned here was `cat /proc/$($FINDPULSE)/status` and
+check that `NoNewPrivs: 0`. If not, check the [systemd
+manual][nonewprivs] and make sure that your systemd entry doesn't do
+any of the things that imply `NoNewPrivs:1`.
+[nonewprivs]: https://www.freedesktop.org/software/systemd/man/systemd.exec.html#NoNewPrivileges=
 
-So it has `cap_sys_nice`.
+So I added the lines:
 
-But I still can't run the test.
+    RestrictRealtime=no
+    MemoryDenyWriteExecute=no
+    RestrictNamespaces=no
+    LockPersonality=no
+    NoNewPrivileges=no
 
-Well, [this page][] suggested sticking something in`/etc/security/limits.conf`. In that file:
-[this page]: https://forums.opensuse.org/showthread.php/400774-Pulseaudio-Can-t-get-realtime-or-high-priority-permissions
+### My service still can't get realtime!
 
-    @audio          -       rtprio          99
-    @audio          -       nice            -20
-    @audio          -       memlock         4000000
-    rtkit          -       rtprio          99
-    rtkit          -       nice            -20
-    rtkit          -       memlock         4000000
-    
-But I'm in audio group, and rtkit-daemon is still not testing out:
+Still, I found this in syslog:
 
-    Dec 13 06:44:33 localhost rtkit-daemon[10343]: Failed to make ourselves RT: Operation not permitted
+    pulseaudio[12201]: setrlimit(RLIMIT_NICE, (31, 31)) failed: Operation not permitted
+    pulseaudio[12201]: setrlimit(RLIMIT_RTPRIO, (9, 9)) failed: Operation not permitted
+    pulseaudio[18375]: Failed to acquire high-priority scheduling: No such file or directory
 
-When I run `rtkit-test`, the logs show this is launching `rtkit-daemon` on demand.
-[Another thread][at] pointed out that this happens on its own user. Indeed: 
-[at]: https://bbs.archlinux.org/viewtopic.php?id=230079
+[This page][cgroups] on `freedeskdop.org` suggests that this is a
+cgroups problem, even though I disabled the cgroups realtime scheduler
+in my kernel. Systemd puts processes into a slice for each service,
+and the slice must have some realtime assigned to it. The page
+suggests adding some `ControlGroup` settings to the service file:
 
-    $ getent passwd rtkit
-    rtkit:x:120:131:RealtimeKit,,,:/proc:/usr/sbin/nologin
+    ControlGroup=cpu:/
+    ControlGroupAttribute=cpu.rt_runtime_us 450000
+    ControlGroupAttribute=cpu.rt_period_us  500000
 
-So that group needs permissions too, which I added. (above). I also added rtkit to group `audio` if that helps (it didn't)
+But this resulted in:
 
-Yet no dice. I am still not getting any joy from rtkit-test.
+    systemd[1]: /etc/systemd/system/pulseaudio.service:35: Unknown key name 'ControlGroup' in section 'Service', ignoring.
+    systemd[1]: /etc/systemd/system/pulseaudio.service:36: Unknown key name 'ControlGroupAttribute' in section 'Service', ignoring.
+    systemd[1]: /etc/systemd/system/pulseaudio.service:37: Unknown key name 'ControlGroupAttribute' in section 'Service', ignoring.
 
-Oops. It seems my kernel does not have realtime:
+It seems that since the `freedesktop.org` page was penned, linux now
+has moved to [control groups v2][] and [systemd][] thus has [a new
+set][systemdv2] of config options.
+[control groups v2]: https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html
+[headsup]: https://lwn.net/Articles/555923/
+[systemdv2]: https://www.freedesktop.org/software/systemd/man/systemd.resource-control.html
 
-    :~$ grep PREEMPT /boot/config-5.8.6-sunxi
-    CONFIG_PREEMPT_NONE=y
-    # CONFIG_PREEMPT_VOLUNTARY is not set
-    # CONFIG_PREEMPT is not set
-    # CONFIG_PREEMPTIRQ_DELAY_TEST is not set
+("Control groups v2" and "unified resource hierarchy" are the same
+thing, I think.) At this point, it helped to read something about
+cgroups [written in 2020.][2020]
+[2020]: https://www.redhat.com/sysadmin/cgroups-part-one
 
----
+I see in my `/sys/fs/cgroup/unified` directory exists which means we
+are in the "hybrid" situation described on [this page][cgroup].
+[cgroup]: https://systemd.io/CGROUP_DELEGATION/
 
-This doesn't help with rtkit-test yet, but one other thing this might
-have told me is that when you're running as a systemd service, that
-systemd controls your realtime and nice level. This is configured in
-`/etc/systemd/pulseaudio.service`:
+In any case, the secret sauce was adding explicit settings for RTPRIO
+and nice limits to `/etc/systemd/system/pulseaudio.service`. The
+relevant settings are documented on [this page][exec].
+[exec]: https://www.freedesktop.org/software/systemd/man/systemd.exec.html
 
-```
-AmbientCapabilities=CAP_SYS_NICE
-RestrictRealtime=no
-IOSchedulingClass="{%if pulse_daemon_conf['realtime-scheduling'] %}realtime{% else %}{% endif %}"
-IOSchedulingPriority={{pulse_daemon_conf['realtime-priority']}}
-CPUSchedulingPolicy=rr
-CPUSchedulingPriority={{pulse_daemon_conf['realtime-priority']}}
-Nice={{pulse_daemon_conf['nice-level']}}
-```
-
-But `systemd` threw this error:
-
-```
-Dec 13 06:05:23 localhost systemd[1540]: pulseaudio.service: Failed at step SETSCHEDULER spawning /usr/bin/pulseaudio: Operation not permitted
-Dec 13 06:05:23 localhost systemd[1]: pulseaudio.service: Main process exited, code=exited, status=214/SETSCHEDULER
-```
-
-So I need more capabilities.
+    # for control groups v2:
+    LimitRTPRIO=95
+    LimitRTTIME=500000
+    LimitNICE=-19
 

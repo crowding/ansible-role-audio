@@ -14,11 +14,6 @@
     name: "shairport-sync.target"
     state: stopped
   listen: "reload systemd"
-- name: "restart rtkit"
-  systemd:
-    name: "rtkit-daemon"
-    state: restarted
-  listen: "restart rtkit"
 - name: "restart bluetooth"
   become: yes
   systemd:

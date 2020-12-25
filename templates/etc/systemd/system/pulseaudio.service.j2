@@ -20,21 +20,36 @@ User=pulse
 Group=audio
 # make /var/run/pulse for temp files
 RuntimeDirectory=pulse
-ExecStart=/usr/bin/pulseaudio --daemonize=no --log-target=journal --log-level=4
+ExecStart=/usr/bin/pulseaudio --daemonize=no --log-target=journal
 LockPersonality=yes
 MemoryDenyWriteExecute=yes
 NoNewPrivileges=yes
 Restart=on-failure
-RestrictNamespaces=yes
-AmbientCapabilities=CAP_SYS_NICE
+
 RestrictRealtime=no
-IOSchedulingClass="{%if audio.pulse_daemon_conf['realtime-scheduling'] %}realtime{% else %}{% endif %}"
-IOSchedulingPriority={{audio.pulse_daemon_conf['realtime-priority']}}
-CPUSchedulingPolicy=rr
-CPUSchedulingPriority={{audio.pulse_daemon_conf['realtime-priority']}}
-Nice={{audio.pulse_daemon_conf['nice-level']}}
-SystemCallArchitectures=native
-SystemCallFilter=@system-service
+MemoryDenyWriteExecute=no
+RestrictNamespaces=no
+LockPersonality=no
+NoNewPrivileges=no
+
+{%if audio.pulse_daemon_conf['realtime-scheduling'] %}
+IOSchedulingClass=realtime
+IOSchedulingPriority=1
+#CPUSchedulingPolicy=rr
+#CPUSchedulingPriority={{audio.pulse_daemon_conf['realtime-priority']}}
+#Nice={{audio.pulse_daemon_conf['nice-level']}}
+
+# for control groups v1:
+#ControlGroup=cpu:/
+#ControlGroupAttribute=cpu.rt_runtime_us 450000
+#ControlGroupAttribute=cpu.rt_period_us  500000
+# for control groups v2:
+#Slice=-.slice
+LimitRTPRIO=95
+LimitRTTIME=500000
+LimitNICE=-19
+{% endif %}
+
 # Note that notify will only work if --daemonize=no
 Type=notify
 UMask=0077
