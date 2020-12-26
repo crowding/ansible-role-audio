@@ -1,0 +1,39 @@
+
+audio_cfg:
+  bluetooth_rx: yes
+  bluetooth_pw: 1234
+  backend: "pulse"
+  pulse_daemon_conf:
+    realtime-scheduling: yes
+
+  # devpath can be discovered by `udevadm info -e | grep sound`
+  # the first output named in this section is used as "default"
+  cards:
+    - name: downstairs_card                      # name to assign to card
+      devpath: '?*/8-1:1.0/sound/card?*' # pattern to match udev path
+      profile: "output:analog-surround-51" # tells Pulse how many channels to use
+      outputs:
+        - lab
+        - laundry
+        - cave
+    - name: upstairs_card
+      devpath: '?*/6-1:1.0/sound/card?*'
+      profile: "output:analog-surround-71"
+      outputs:
+        - living_room
+        - kitchen
+        - office
+        - bedroom
+    - name: avantree_card
+      devpath: "?*/4-1.2:1.0/sound/card?"
+      profile: "output:analog-stereo"
+      outputs:
+        - wireless
+
+  virtual_outputs:
+    - name: "_upstairs"
+      combining: [kitchen, office, living_room]
+    - name: "_downstairs"
+      combining: [lab, laundry, cave, wireless]
+    - name: "_everywhere"
+      combining: [living_room, kitchen, office, lab, laundry, cave, wireless]
