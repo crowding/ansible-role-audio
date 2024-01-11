@@ -1,106 +1,15 @@
-- name: configure udev
-  become: yes
-  template:
-    src: "etc/udev/rules.d/39-audio.rules.j2"
-    dest: "/etc/udev/rules.d/39-audio.rules"
-  notify: "reload udev rules"
-- name: install packages
-  become: yes
-  apt: 
-    name:
-    - avahi-daemon
-    - pulseaudio-module-zeroconf
-    - pulsemixer
-    - pulseaudio-utils
-    state: present
-- name: allow Ansible user access to audio
-  become: yes
-  user:
-    name: "{{ansible_user}}"
-    groups:
-      - "pulse-access"
-      - "pulse"
-      - "audio"
-    append: yes
-- name: allow realtime mode
-  tags: realtime
+---
+
+- name: wat
+  debug:
+    var: audio_client
+
+- name: client config
   include_tasks:
-    file: realtime.yml
-    apply:
-      tags: realtime
-  when: audio.pulse_daemon_conf["realtime-scheduling"] is true
-- name: write asound conf
-  become: yes
-  template:
-    src: "etc/asound.conf.j2"
-    dest: "/etc/asound.conf"
-  notify:
-    - "reload alsa"
-- name: bluetooth
-  import_tasks: "bluetooth.yml"
-  when: audio.bluetooth_rx or audio.bluetooth_tx
-- name: write pulseaudio daemon.conf
-  become: yes
-  template:
-    src: "etc/pulse/daemon.conf.j2"
-    dest: "/etc/pulse/daemon.conf"
-  notify: "restart pulseaudio"
-- name: write pulseaudio client conf
-  become: yes
-  template:
-    src: "etc/pulse/client.conf.j2"
-    dest: "/etc/pulse/client.conf"
-  notify: "restart shairport"
-- name: write pulseaudio default.pa
-  become: yes
-  template:
-    src: "etc/pulse/default.pa.j2"
-    dest: "/etc/pulse/default.pa"
-  notify: "restart pulseaudio"
-- name: remove user service entries
-  become: yes
-  file:
-    path: "{{item}}"
-    state: absent
-  loop:
-    - "/usr/lib/systemd/user/pulseaudio.service"
-    - "/usr/lib/systemd/user/pulseaudio.socket"
-    - "/etc/systemd/user/default.target.wants/pulseaudio.service"
-    - "/etc/systemd/user/sockets.target.wants/pulseaudio.socket"
-  notify: "reload systemd"
-- name: make pulseaudio systemd socket
-  become: yes
-  copy:
-    src: "{{item}}"
-    dest: "/{{item}}"
-  loop:
-    - "etc/systemd/system/pulseaudio.socket"
-  notify: "reload systemd"
-- name: pulseaudio systemd service
-  become: yes
-  template:
-    src: "etc/systemd/system/pulseaudio.service.j2"
-    dest: "/etc/systemd/system/pulseaudio.service"
-  notify:
-    - "reload systemd"
-    - "restart pulseaudio"
-- name: set up airplay service
+    file: client.yml
+  when: audio_client
+      
+- name: server config
   include_tasks:
-    file: airplay.yml
-  when: audio.airplay
-- name: set up DLNA renderer
-  tags: dlna
-  include_tasks:
-    file: gmrender.yml
-  when: audio.dlna
-- meta: flush_handlers
-- name: enable services
-  become: yes
-  systemd:
-    name: "{{item}}"
-    enabled: yes
-    state: started
-  loop:
-    - "bluetooth.service"
-    - "pulseaudio.service"
-    - "shairport-sync.target"
+    file: server.yml
+  when: audio_server

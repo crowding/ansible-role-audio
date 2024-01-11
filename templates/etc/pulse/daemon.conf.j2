@@ -1,6 +1,8 @@
 # This file is managed by Ansible.
 
+{% if audio.sample_rate is defined %}
 default-sample-rate = {{audio.sample_rate}}
+{% endif %}
 {% for key, value in (audio.pulse_daemon_conf).items() %}
 {{key}} = {{value}}
 {% endfor %}

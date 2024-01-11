@@ -1,0 +1,3 @@
+audio_cfg:
+  role: "client"
+  default_sink: "lab@speakers.local"

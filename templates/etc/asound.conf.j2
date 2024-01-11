@@ -6,7 +6,7 @@ pcm.{{card.name}} {
    ipc_key {{2048 + loop.index0}}
    ipc_perm 0666
    ipc_key_add_uid false
-   slave { pcm { type hw; card {{card.name}}; rate {{ audio.sample_rate }} }; channels {{ 2 * card.outputs|length }} }
+   slave { pcm { type hw; card {{card.name}}; {% if audio.sample_rate is defined %} rate {{ audio.sample_rate }} {% endif %}}; channels {{ 2 * card.outputs|length }} }
 }
   {% endif %}
   {% if audio.backend == "pulse" %}

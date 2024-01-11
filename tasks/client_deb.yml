@@ -1,0 +1,30 @@
+- name: install debs
+  become: true
+  apt:
+    name:
+      - pulseaudio
+      - pulseaudio-module-raop
+      - pulseaudio-utils
+      - pulseaudio-module-zeroconf
+    state: present
+- name: pulse config directory
+  file:
+    name: "~/.config/pulse"
+    state: directory
+- name: default.pa
+  stat:
+    path: "~/.config/pulse/default.pa"
+  register: stat_result
+- name: copy default.pa
+  copy:
+    src: "/etc/pulse/default.pa"
+    dest: "~/.config/pulse/default.pa"
+  when: not stat_result.stat.exists
+- name: pulseaudio modules
+  notify: "restart pulseaudio client"
+  blockinfile:
+    path: "~/.config/pulse/default.pa"
+    insertbefore: "RTP"
+    block: |
+      load-module module-zeroconf-discover
+      load-module module-raop-discover

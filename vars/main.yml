@@ -1,2 +1,4 @@
 ---
 audio: "{{audio_defaults | combine(audio_cfg, recursive=True)}}"
+audio_client: "{{audio.role is match('client')}}"
+audio_server: "{{audio.role is match('server')}}"

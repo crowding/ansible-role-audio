@@ -16,11 +16,12 @@ Description=Sound Service
 Requires=pulseaudio.socket
 
 [Service]
-User=pulse
+Description=PulseAudio system server
+User=root
 Group=audio
 # make /var/run/pulse for temp files
 RuntimeDirectory=pulse
-ExecStart=/usr/bin/pulseaudio --daemonize=no --log-target=journal
+ExecStart=/usr/bin/pulseaudio --daemonize=no --log-target=journal --system --realtime  --disallow-module-loading
 LockPersonality=yes
 MemoryDenyWriteExecute=yes
 NoNewPrivileges=yes

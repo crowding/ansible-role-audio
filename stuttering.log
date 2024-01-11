@@ -1,0 +1,497 @@
+Jun 06 03:10:23 speakers pulseaudio[11773]: Implicit underrun of 'ALSA Playback'
+Jun 06 03:10:24 speakers shairport-sync[11799]:          0.120512051 "audio_alsa.c:1674" alsa: underrun while writing 352 samples to alsa device.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Sink update requested latency 100.00
+Jun 06 03:10:24 speakers pulseaudio[11773]: wireless: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: _downstairs: state: RUNNING -> IDLE
+Jun 06 03:10:24 speakers pulseaudio[11773]: avantree_card: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:24 speakers pulseaudio[11773]: wireless: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: Freeing input 176 "ALSA Playback"
+Jun 06 03:10:24 speakers pulseaudio[11773]: avantree_card: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: lab: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: laundry: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: cave: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: downstairs_card: Found underrun 5760 bytes ago (51840 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: lab: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: laundry: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: cave: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: downstairs_card: Found underrun 5760 bytes ago (51840 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: lab: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: laundry: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: cave: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: downstairs_card: Found underrun 5760 bytes ago (51840 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: lab: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: laundry: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: Not setting device for stream ALSA Playback, because already set.
+Jun 06 03:10:24 speakers pulseaudio[11773]: cave: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: downstairs_card: Found underrun 5760 bytes ago (51840 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: Negotiated format: pcm, format.sample_format = "\"s32le\""  format.rate = "44100"  format.channels = "2"  format.channel_map = "\"front-left,front-right\""
+Jun 06 03:10:24 speakers pulseaudio[11773]: Trying to change sample spec
+Jun 06 03:10:24 speakers pulseaudio[11773]: Sink _downstairs becomes busy, resuming.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Resampler:
+Jun 06 03:10:24 speakers pulseaudio[11773]:   rate 44100 -> 48000 (method speex-float-10)
+Jun 06 03:10:24 speakers pulseaudio[11773]:   format s32le -> s16le (intermediate float32le)
+Jun 06 03:10:24 speakers pulseaudio[11773]:   channels 2 -> 2 (resampling 2)
+Jun 06 03:10:24 speakers pulseaudio[11773]: Choosing speex quality setting 10.
+Jun 06 03:10:24 speakers pulseaudio[11773]: memblockq requested: maxlength=33554432, tlength=0, base=4, prebuf=0, minreq=1 maxrewind=0
+Jun 06 03:10:24 speakers pulseaudio[11773]: memblockq sanitized: maxlength=33554432, tlength=33554432, base=4, prebuf=0, minreq=4 maxrewind=0
+Jun 06 03:10:24 speakers pulseaudio[11773]: Created input 177 "ALSA Playback" on _downstairs with sample spec s32le 2ch 44100Hz and channel map front-left,front-right
+Jun 06 03:10:24 speakers pulseaudio[11773]:     media.name = "ALSA Playback"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     application.name = "ALSA plug-in [shairport-sync]"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     native-protocol.peer = "UNIX socket client"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     native-protocol.version = "33"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     application.process.id = "11799"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     application.process.user = "shairport-sync"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     application.process.host = "speakers"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     application.process.binary = "shairport-sync"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     application.language = "C"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     application.process.machine_id = "6f25fe73523b462c903f2c486e612f38"
+Jun 06 03:10:24 speakers pulseaudio[11773]: Requested tlength=11888.62 ms, minreq=11.61 ms
+Jun 06 03:10:24 speakers pulseaudio[11773]: Early requests mode enabled, configuring sink latency to minreq.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Could not configure a sufficiently low latency. Early requests might not be satisfied.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Requested latency=11.61 ms, Received latency=100.00 ms
+Jun 06 03:10:24 speakers pulseaudio[11773]: memblockq requested: maxlength=4194304, tlength=4194304, base=8, prebuf=4096, minreq=4096 maxrewind=0
+Jun 06 03:10:24 speakers pulseaudio[11773]: memblockq sanitized: maxlength=4194304, tlength=4194304, base=8, prebuf=4096, minreq=4096 maxrewind=0
+Jun 06 03:10:24 speakers pulseaudio[11773]: Final latency 11988.62 ms = 11865.40 ms + 2*11.61 ms + 100.00 ms
+Jun 06 03:10:24 speakers pulseaudio[11773]: Sink update requested latency 100.00
+Jun 06 03:10:24 speakers pulseaudio[11773]: wireless: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: _downstairs: state: IDLE -> RUNNING
+Jun 06 03:10:24 speakers pulseaudio[11773]: avantree_card: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: wireless: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: avantree_card: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: lab: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: wireless: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: laundry: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: avantree_card: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: downstairs_card: Found underrun 8640 bytes ago (48960 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: lab: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: laundry: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: downstairs_card: Found underrun 8640 bytes ago (48960 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: wireless: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: avantree_card: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: wireless: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: avantree_card: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:24 speakers shairport-sync[11799]:          0.068337036 "player.c:2146" Player: packets out of sequence: expected: 59548, got: 59571, with ab_read: 59572 and ab_write: 59795.
+Jun 06 03:10:24 speakers shairport-sync[11799]:          0.026851666 "player.c:2285" Large negative sync error: -7272 with should_be_frame_32 of 2746449271, nt of 2746369700 and current_delay of 1357.
+Jun 06 03:10:24 speakers shairport-sync[11799]:          0.001001796 "player.c:2300" Play a silence of 7272 frames.
+Jun 06 03:10:24 speakers shairport-sync[11799]:          0.075923670 "player.c:2146" Player: packets out of sequence: expected: 59575, got: 59584, with ab_read: 59585 and ab_write: 59805.
+Jun 06 03:10:24 speakers shairport-sync[11799]:          0.102841709 "player.c:2273" Large positive sync error: 2804.
+Jun 06 03:10:24 speakers shairport-sync[11799]:          0.137275717 "player.c:2146" Player: packets out of sequence: expected: 59598, got: 59614, with ab_read: 59615 and ab_write: 59835.
+Jun 06 03:10:24 speakers shairport-sync[11799]:          0.022798692 "player.c:2273" Large positive sync error: 4468.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Implicit underrun of 'ALSA Playback'
+Jun 06 03:10:24 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:24 speakers shairport-sync[11799]:          0.175673494 "player.c:2146" Player: packets out of sequence: expected: 59618, got: 59639, with ab_read: 59640 and ab_write: 59862.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Implicit underrun of 'ALSA Playback'
+Jun 06 03:10:24 speakers shairport-sync[11799]:          0.049055172 "audio_alsa.c:1674" alsa: underrun while writing 353 samples to alsa device.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Sink update requested latency 100.00
+Jun 06 03:10:24 speakers pulseaudio[11773]: _downstairs: state: RUNNING -> IDLE
+Jun 06 03:10:24 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Freeing input 177 "ALSA Playback"
+Jun 06 03:10:24 speakers pulseaudio[11773]: cave: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: downstairs_card: Found underrun 2880 bytes ago (54720 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: Not setting device for stream ALSA Playback, because already set.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Negotiated format: pcm, format.sample_format = "\"s32le\""  format.rate = "44100"  format.channels = "2"  format.channel_map = "\"front-left,front-right\""
+Jun 06 03:10:24 speakers pulseaudio[11773]: Trying to change sample spec
+Jun 06 03:10:24 speakers pulseaudio[11773]: Sink _downstairs becomes busy, resuming.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Resampler:
+Jun 06 03:10:24 speakers pulseaudio[11773]:   rate 44100 -> 48000 (method speex-float-10)
+Jun 06 03:10:24 speakers pulseaudio[11773]:   format s32le -> s16le (intermediate float32le)
+Jun 06 03:10:24 speakers pulseaudio[11773]:   channels 2 -> 2 (resampling 2)
+Jun 06 03:10:24 speakers pulseaudio[11773]: Choosing speex quality setting 10.
+Jun 06 03:10:24 speakers pulseaudio[11773]: memblockq requested: maxlength=33554432, tlength=0, base=4, prebuf=0, minreq=1 maxrewind=0
+Jun 06 03:10:24 speakers pulseaudio[11773]: memblockq sanitized: maxlength=33554432, tlength=33554432, base=4, prebuf=0, minreq=4 maxrewind=0
+Jun 06 03:10:24 speakers pulseaudio[11773]: Created input 178 "ALSA Playback" on _downstairs with sample spec s32le 2ch 44100Hz and channel map front-left,front-right
+Jun 06 03:10:24 speakers pulseaudio[11773]:     media.name = "ALSA Playback"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     application.name = "ALSA plug-in [shairport-sync]"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     native-protocol.peer = "UNIX socket client"
+Jun 06 03:10:24 speakers shairport-sync[11799]:          0.017566470 "player.c:2285" Large negative sync error: -7612 with should_be_frame_32 of 2746474926, nt of 2746395396 and current_delay of 1058.
+Jun 06 03:10:24 speakers shairport-sync[11799]:          0.001273661 "player.c:2300" Play a silence of 7612 frames.
+Jun 06 03:10:24 speakers pulseaudio[11773]:     native-protocol.version = "33"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     application.process.id = "11799"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     application.process.user = "shairport-sync"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     application.process.host = "speakers"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     application.process.binary = "shairport-sync"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     application.language = "C"
+Jun 06 03:10:24 speakers pulseaudio[11773]:     application.process.machine_id = "6f25fe73523b462c903f2c486e612f38"
+Jun 06 03:10:24 speakers pulseaudio[11773]: Requested tlength=11888.62 ms, minreq=11.61 ms
+Jun 06 03:10:24 speakers pulseaudio[11773]: Early requests mode enabled, configuring sink latency to minreq.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Could not configure a sufficiently low latency. Early requests might not be satisfied.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Requested latency=11.61 ms, Received latency=100.00 ms
+Jun 06 03:10:24 speakers pulseaudio[11773]: memblockq requested: maxlength=4194304, tlength=4194304, base=8, prebuf=4096, minreq=4096 maxrewind=0
+Jun 06 03:10:24 speakers pulseaudio[11773]: memblockq sanitized: maxlength=4194304, tlength=4194304, base=8, prebuf=4096, minreq=4096 maxrewind=0
+Jun 06 03:10:24 speakers pulseaudio[11773]: Final latency 11988.62 ms = 11865.40 ms + 2*11.61 ms + 100.00 ms
+Jun 06 03:10:24 speakers pulseaudio[11773]: Sink update requested latency 100.00
+Jun 06 03:10:24 speakers pulseaudio[11773]: wireless: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: _downstairs: state: IDLE -> RUNNING
+Jun 06 03:10:24 speakers pulseaudio[11773]: avantree_card: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: wireless: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: avantree_card: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: wireless: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: avantree_card: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: wireless: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: avantree_card: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: wireless: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: avantree_card: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:24 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:24 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:24 speakers shairport-sync[11799]:          0.077412156 "player.c:2146" Player: packets out of sequence: expected: 59648, got: 59657, with ab_read: 59658 and ab_write: 59881.
+Jun 06 03:10:24 speakers shairport-sync[11799]:          0.101831580 "player.c:2273" Large positive sync error: 2687.
+Jun 06 03:10:24 speakers shairport-sync[11799]:          0.138007273 "player.c:2146" Player: packets out of sequence: expected: 59671, got: 59687, with ab_read: 59688 and ab_write: 59911.
+Jun 06 03:10:25 speakers shairport-sync[11799]:          0.025566089 "player.c:2273" Large positive sync error: 4061.
+Jun 06 03:10:25 speakers shairport-sync[11799]:          0.166585083 "player.c:2146" Player: packets out of sequence: expected: 59691, got: 59711, with ab_read: 59712 and ab_write: 59933.
+Jun 06 03:10:25 speakers shairport-sync[11799]:          0.020550651 "player.c:2273" Large positive sync error: 4517.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Implicit underrun of 'ALSA Playback'
+Jun 06 03:10:25 speakers pulseaudio[11773]: 612 events suppressed
+Jun 06 03:10:25 speakers pulseaudio[11773]: pulsecore/memblockq.c: list_items flist is full (don't worry)
+Jun 06 03:10:25 speakers pulseaudio[11773]: pulsecore/memblockq.c: list_items flist is full (don't worry)
+Jun 06 03:10:25 speakers pulseaudio[11773]: pulsecore/memblockq.c: list_items flist is full (don't worry)
+Jun 06 03:10:25 speakers pulseaudio[11773]: pulsecore/memblockq.c: list_items flist is full (don't worry)
+Jun 06 03:10:25 speakers pulseaudio[11773]: pulsecore/memblockq.c: list_items flist is full (don't worry)
+Jun 06 03:10:25 speakers pulseaudio[11773]: pulsecore/memblockq.c: list_items flist is full (don't worry)
+Jun 06 03:10:25 speakers shairport-sync[11799]:          0.105890636 "audio_alsa.c:1674" alsa: underrun while writing 352 samples to alsa device.
+Jun 06 03:10:25 speakers pulseaudio[11773]: pulsecore/memblockq.c: list_items flist is full (don't worry)
+Jun 06 03:10:25 speakers pulseaudio[11773]: pulsecore/memblockq.c: list_items flist is full (don't worry)
+Jun 06 03:10:25 speakers pulseaudio[11773]: pulsecore/memblockq.c: list_items flist is full (don't worry)
+Jun 06 03:10:25 speakers pulseaudio[11773]: pulsecore/memblockq.c: list_items flist is full (don't worry)
+Jun 06 03:10:25 speakers pulseaudio[11773]: pulsecore/memblockq.c: list_items flist is full (don't worry)
+Jun 06 03:10:25 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Sink update requested latency 100.00
+Jun 06 03:10:25 speakers pulseaudio[11773]: _downstairs: state: RUNNING -> IDLE
+Jun 06 03:10:25 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Freeing input 178 "ALSA Playback"
+Jun 06 03:10:25 speakers pulseaudio[11773]: Not setting device for stream ALSA Playback, because already set.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Negotiated format: pcm, format.sample_format = "\"s32le\""  format.rate = "44100"  format.channels = "2"  format.channel_map = "\"front-left,front-right\""
+Jun 06 03:10:25 speakers pulseaudio[11773]: Trying to change sample spec
+Jun 06 03:10:25 speakers pulseaudio[11773]: Sink _downstairs becomes busy, resuming.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Resampler:
+Jun 06 03:10:25 speakers pulseaudio[11773]:   rate 44100 -> 48000 (method speex-float-10)
+Jun 06 03:10:25 speakers pulseaudio[11773]:   format s32le -> s16le (intermediate float32le)
+Jun 06 03:10:25 speakers pulseaudio[11773]:   channels 2 -> 2 (resampling 2)
+Jun 06 03:10:25 speakers pulseaudio[11773]: Choosing speex quality setting 10.
+Jun 06 03:10:25 speakers pulseaudio[11773]: memblockq requested: maxlength=33554432, tlength=0, base=4, prebuf=0, minreq=1 maxrewind=0
+Jun 06 03:10:25 speakers pulseaudio[11773]: memblockq sanitized: maxlength=33554432, tlength=33554432, base=4, prebuf=0, minreq=4 maxrewind=0
+Jun 06 03:10:25 speakers pulseaudio[11773]: Created input 179 "ALSA Playback" on _downstairs with sample spec s32le 2ch 44100Hz and channel map front-left,front-right
+Jun 06 03:10:25 speakers pulseaudio[11773]:     media.name = "ALSA Playback"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     application.name = "ALSA plug-in [shairport-sync]"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     native-protocol.peer = "UNIX socket client"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     native-protocol.version = "33"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     application.process.id = "11799"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     application.process.user = "shairport-sync"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     application.process.host = "speakers"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     application.process.binary = "shairport-sync"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     application.language = "C"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     application.process.machine_id = "6f25fe73523b462c903f2c486e612f38"
+Jun 06 03:10:25 speakers pulseaudio[11773]: Requested tlength=11888.62 ms, minreq=11.61 ms
+Jun 06 03:10:25 speakers pulseaudio[11773]: Early requests mode enabled, configuring sink latency to minreq.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Could not configure a sufficiently low latency. Early requests might not be satisfied.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Requested latency=11.61 ms, Received latency=100.00 ms
+Jun 06 03:10:25 speakers pulseaudio[11773]: memblockq requested: maxlength=4194304, tlength=4194304, base=8, prebuf=4096, minreq=4096 maxrewind=0
+Jun 06 03:10:25 speakers pulseaudio[11773]: memblockq sanitized: maxlength=4194304, tlength=4194304, base=8, prebuf=4096, minreq=4096 maxrewind=0
+Jun 06 03:10:25 speakers pulseaudio[11773]: Final latency 11988.62 ms = 11865.40 ms + 2*11.61 ms + 100.00 ms
+Jun 06 03:10:25 speakers pulseaudio[11773]: Sink update requested latency 100.00
+Jun 06 03:10:25 speakers pulseaudio[11773]: wireless: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: avantree_card: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: wireless: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: avantree_card: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: lab: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: laundry: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: cave: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: downstairs_card: Found underrun 5760 bytes ago (51840 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: lab: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: laundry: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: cave: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: downstairs_card: Found underrun 5760 bytes ago (51840 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: lab: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: laundry: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: cave: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: downstairs_card: Found underrun 5760 bytes ago (51840 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: lab: Found underrun 960 bytes ago (18240 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: laundry: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: cave: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: downstairs_card: Found underrun 5760 bytes ago (51840 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: _downstairs: state: IDLE -> RUNNING
+Jun 06 03:10:25 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:25 speakers shairport-sync[11799]:          0.071603248 "player.c:2146" Player: packets out of sequence: expected: 59715, got: 59736, with ab_read: 59737 and ab_write: 59959.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Implicit underrun of 'ALSA Playback'
+Jun 06 03:10:25 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:25 speakers shairport-sync[11799]:          0.023979565 "player.c:2285" Large negative sync error: -7078 with should_be_frame_32 of 2746507250, nt of 2746427780 and current_delay of 1652.
+Jun 06 03:10:25 speakers shairport-sync[11799]:          0.000859259 "player.c:2300" Play a silence of 7078 frames.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Implicit underrun of 'ALSA Playback'
+Jun 06 03:10:25 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:25 speakers shairport-sync[11799]:          0.079158467 "player.c:2146" Player: packets out of sequence: expected: 59740, got: 59749, with ab_read: 59750 and ab_write: 59971.
+Jun 06 03:10:25 speakers shairport-sync[11799]:          0.023735865 "player.c:2273" Large positive sync error: 4221.
+Jun 06 03:10:25 speakers shairport-sync[11799]:          0.166199889 "player.c:2146" Player: packets out of sequence: expected: 59753, got: 59773, with ab_read: 59774 and ab_write: 59997.
+Jun 06 03:10:25 speakers shairport-sync[11799]:          0.024450339 "player.c:2273" Large positive sync error: 8401.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Implicit underrun of 'ALSA Playback'
+Jun 06 03:10:25 speakers shairport-sync[11799]:          0.191813309 "audio_alsa.c:1674" alsa: underrun while writing 352 samples to alsa device.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Sink update requested latency 100.00
+Jun 06 03:10:25 speakers pulseaudio[11773]: _downstairs: state: RUNNING -> IDLE
+Jun 06 03:10:25 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Freeing input 179 "ALSA Playback"
+Jun 06 03:10:25 speakers pulseaudio[11773]: Not setting device for stream ALSA Playback, because already set.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Negotiated format: pcm, format.sample_format = "\"s32le\""  format.rate = "44100"  format.channels = "2"  format.channel_map = "\"front-left,front-right\""
+Jun 06 03:10:25 speakers pulseaudio[11773]: Trying to change sample spec
+Jun 06 03:10:25 speakers pulseaudio[11773]: Sink _downstairs becomes busy, resuming.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Resampler:
+Jun 06 03:10:25 speakers pulseaudio[11773]:   rate 44100 -> 48000 (method speex-float-10)
+Jun 06 03:10:25 speakers pulseaudio[11773]:   format s32le -> s16le (intermediate float32le)
+Jun 06 03:10:25 speakers pulseaudio[11773]:   channels 2 -> 2 (resampling 2)
+Jun 06 03:10:25 speakers pulseaudio[11773]: Choosing speex quality setting 10.
+Jun 06 03:10:25 speakers pulseaudio[11773]: memblockq requested: maxlength=33554432, tlength=0, base=4, prebuf=0, minreq=1 maxrewind=0
+Jun 06 03:10:25 speakers pulseaudio[11773]: memblockq sanitized: maxlength=33554432, tlength=33554432, base=4, prebuf=0, minreq=4 maxrewind=0
+Jun 06 03:10:25 speakers pulseaudio[11773]: Created input 180 "ALSA Playback" on _downstairs with sample spec s32le 2ch 44100Hz and channel map front-left,front-right
+Jun 06 03:10:25 speakers pulseaudio[11773]:     media.name = "ALSA Playback"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     application.name = "ALSA plug-in [shairport-sync]"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     native-protocol.peer = "UNIX socket client"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     native-protocol.version = "33"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     application.process.id = "11799"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     application.process.user = "shairport-sync"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     application.process.host = "speakers"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     application.process.binary = "shairport-sync"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     application.language = "C"
+Jun 06 03:10:25 speakers pulseaudio[11773]:     application.process.machine_id = "6f25fe73523b462c903f2c486e612f38"
+Jun 06 03:10:25 speakers pulseaudio[11773]: Requested tlength=11888.62 ms, minreq=11.61 ms
+Jun 06 03:10:25 speakers pulseaudio[11773]: Early requests mode enabled, configuring sink latency to minreq.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Could not configure a sufficiently low latency. Early requests might not be satisfied.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Requested latency=11.61 ms, Received latency=100.00 ms
+Jun 06 03:10:25 speakers pulseaudio[11773]: memblockq requested: maxlength=4194304, tlength=4194304, base=8, prebuf=4096, minreq=4096 maxrewind=0
+Jun 06 03:10:25 speakers pulseaudio[11773]: memblockq sanitized: maxlength=4194304, tlength=4194304, base=8, prebuf=4096, minreq=4096 maxrewind=0
+Jun 06 03:10:25 speakers pulseaudio[11773]: Final latency 11988.62 ms = 11865.40 ms + 2*11.61 ms + 100.00 ms
+Jun 06 03:10:25 speakers pulseaudio[11773]: Sink update requested latency 100.00
+Jun 06 03:10:25 speakers pulseaudio[11773]: wireless: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: avantree_card: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: wireless: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: lab: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: avantree_card: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: laundry: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: cave: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: downstairs_card: Found underrun 5760 bytes ago (51840 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: lab: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: laundry: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: cave: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: downstairs_card: Found underrun 5760 bytes ago (51840 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: lab: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: laundry: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: cave: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: downstairs_card: Found underrun 5760 bytes ago (51840 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: lab: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: laundry: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: cave: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: downstairs_card: Found underrun 5760 bytes ago (51840 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: _downstairs: state: IDLE -> RUNNING
+Jun 06 03:10:25 speakers pulseaudio[11773]: wireless: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: avantree_card: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: wireless: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: avantree_card: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:25 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:25 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:25 speakers shairport-sync[11799]:          0.070509956 "player.c:2146" Player: packets out of sequence: expected: 59777, got: 59809, with ab_read: 59810 and ab_write: 60030.
+Jun 06 03:10:25 speakers shairport-sync[11799]:          0.028938921 "player.c:2285" Large negative sync error: -7274 with should_be_frame_32 of 2746533078, nt of 2746453476 and current_delay of 1324.
+Jun 06 03:10:25 speakers shairport-sync[11799]:          0.001000754 "player.c:2300" Play a silence of 7274 frames.
+Jun 06 03:10:26 speakers shairport-sync[11799]:          0.074225901 "player.c:2146" Player: packets out of sequence: expected: 59813, got: 59822, with ab_read: 59823 and ab_write: 60046.
+Jun 06 03:10:26 speakers shairport-sync[11799]:          0.106882391 "player.c:2273" Large positive sync error: 2921.
+Jun 06 03:10:26 speakers pulseaudio[11773]: [lab] total=102.74ms sink=102.74ms
+Jun 06 03:10:26 speakers pulseaudio[11773]: [laundry] total=102.42ms sink=102.42ms
+Jun 06 03:10:26 speakers pulseaudio[11773]: [cave] total=102.19ms sink=102.19ms
+Jun 06 03:10:26 speakers pulseaudio[11773]: [wireless] total=102.09ms sink=102.09ms
+Jun 06 03:10:26 speakers pulseaudio[11773]: [_downstairs] avg total latency is 102.36 msec.
+Jun 06 03:10:26 speakers pulseaudio[11773]: [_downstairs] target latency is 102.74 msec.
+Jun 06 03:10:26 speakers pulseaudio[11773]: [lab] new rate is 48000 Hz; ratio is 1.000; latency is 102.74 msec.
+Jun 06 03:10:26 speakers pulseaudio[11773]: [laundry] new rate is 48000 Hz; ratio is 1.000; latency is 102.42 msec.
+Jun 06 03:10:26 speakers pulseaudio[11773]: [cave] new rate is 48000 Hz; ratio is 1.000; latency is 102.19 msec.
+Jun 06 03:10:26 speakers pulseaudio[11773]: [wireless] new rate is 48000 Hz; ratio is 1.000; latency is 102.09 msec.
+Jun 06 03:10:26 speakers shairport-sync[11799]:          0.142741888 "player.c:2146" Player: packets out of sequence: expected: 59836, got: 59853, with ab_read: 59854 and ab_write: 60075.
+Jun 06 03:10:26 speakers shairport-sync[11799]:          0.022295211 "player.c:2273" Large positive sync error: 4709.
+Jun 06 03:10:26 speakers pulseaudio[11773]: Implicit underrun of 'ALSA Playback'
+Jun 06 03:10:26 speakers shairport-sync[11799]:          0.111273978 "audio_alsa.c:1674" alsa: underrun while writing 352 samples to alsa device.
+Jun 06 03:10:26 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:26 speakers pulseaudio[11773]: Sink update requested latency 100.00
+Jun 06 03:10:26 speakers pulseaudio[11773]: _downstairs: state: RUNNING -> IDLE
+Jun 06 03:10:26 speakers pulseaudio[11773]: wireless: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:26 speakers pulseaudio[11773]: avantree_card: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: Freeing input 180 "ALSA Playback"
+Jun 06 03:10:26 speakers pulseaudio[11773]: wireless: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: avantree_card: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: lab: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: laundry: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: cave: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: downstairs_card: Found underrun 8640 bytes ago (48960 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: lab: Found underrun 3840 bytes ago (15360 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: laundry: Found underrun 3840 bytes ago (15360 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: cave: Found underrun 3840 bytes ago (15360 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: downstairs_card: Found underrun 11520 bytes ago (46080 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: lab: Found underrun 3840 bytes ago (15360 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: laundry: Found underrun 3840 bytes ago (15360 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: cave: Found underrun 3840 bytes ago (15360 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: Not setting device for stream ALSA Playback, because already set.
+Jun 06 03:10:26 speakers pulseaudio[11773]: downstairs_card: Found underrun 11520 bytes ago (46080 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: Negotiated format: pcm, format.sample_format = "\"s32le\""  format.rate = "44100"  format.channels = "2"  format.channel_map = "\"front-left,front-right\""
+Jun 06 03:10:26 speakers pulseaudio[11773]: lab: Found underrun 3840 bytes ago (15360 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: laundry: Found underrun 3840 bytes ago (15360 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: Trying to change sample spec
+Jun 06 03:10:26 speakers pulseaudio[11773]: cave: Found underrun 3840 bytes ago (15360 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: Sink _downstairs becomes busy, resuming.
+Jun 06 03:10:26 speakers pulseaudio[11773]: downstairs_card: Found underrun 11520 bytes ago (46080 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:26 speakers pulseaudio[11773]: Resampler:
+Jun 06 03:10:26 speakers pulseaudio[11773]:   rate 44100 -> 48000 (method speex-float-10)
+Jun 06 03:10:26 speakers pulseaudio[11773]:   format s32le -> s16le (intermediate float32le)
+Jun 06 03:10:26 speakers pulseaudio[11773]:   channels 2 -> 2 (resampling 2)
+Jun 06 03:10:26 speakers pulseaudio[11773]: Choosing speex quality setting 10.
+Jun 06 03:10:26 speakers pulseaudio[11773]: lab: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: laundry: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: memblockq requested: maxlength=33554432, tlength=0, base=4, prebuf=0, minreq=1 maxrewind=0
+Jun 06 03:10:26 speakers pulseaudio[11773]: cave: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: downstairs_card: Found underrun 14400 bytes ago (43200 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: memblockq sanitized: maxlength=33554432, tlength=33554432, base=4, prebuf=0, minreq=4 maxrewind=0
+Jun 06 03:10:26 speakers pulseaudio[11773]: Created input 181 "ALSA Playback" on _downstairs with sample spec s32le 2ch 44100Hz and channel map front-left,front-right
+Jun 06 03:10:26 speakers pulseaudio[11773]:     media.name = "ALSA Playback"
+Jun 06 03:10:26 speakers pulseaudio[11773]:     application.name = "ALSA plug-in [shairport-sync]"
+Jun 06 03:10:26 speakers pulseaudio[11773]:     native-protocol.peer = "UNIX socket client"
+Jun 06 03:10:26 speakers pulseaudio[11773]:     native-protocol.version = "33"
+Jun 06 03:10:26 speakers pulseaudio[11773]: wireless: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]:     application.process.id = "11799"
+Jun 06 03:10:26 speakers pulseaudio[11773]: avantree_card: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]:     application.process.user = "shairport-sync"
+Jun 06 03:10:26 speakers pulseaudio[11773]:     application.process.host = "speakers"
+Jun 06 03:10:26 speakers pulseaudio[11773]:     application.process.binary = "shairport-sync"
+Jun 06 03:10:26 speakers pulseaudio[11773]:     application.language = "C"
+Jun 06 03:10:26 speakers pulseaudio[11773]:     application.process.machine_id = "6f25fe73523b462c903f2c486e612f38"
+Jun 06 03:10:26 speakers pulseaudio[11773]: Requested tlength=11888.62 ms, minreq=11.61 ms
+Jun 06 03:10:26 speakers pulseaudio[11773]: Early requests mode enabled, configuring sink latency to minreq.
+Jun 06 03:10:26 speakers pulseaudio[11773]: Could not configure a sufficiently low latency. Early requests might not be satisfied.
+Jun 06 03:10:26 speakers pulseaudio[11773]: Requested latency=11.61 ms, Received latency=100.00 ms
+Jun 06 03:10:26 speakers pulseaudio[11773]: memblockq requested: maxlength=4194304, tlength=4194304, base=8, prebuf=4096, minreq=4096 maxrewind=0
+Jun 06 03:10:26 speakers pulseaudio[11773]: memblockq sanitized: maxlength=4194304, tlength=4194304, base=8, prebuf=4096, minreq=4096 maxrewind=0
+Jun 06 03:10:26 speakers pulseaudio[11773]: Final latency 11988.62 ms = 11865.40 ms + 2*11.61 ms + 100.00 ms
+Jun 06 03:10:26 speakers pulseaudio[11773]: Sink update requested latency 100.00
+Jun 06 03:10:26 speakers pulseaudio[11773]: wireless: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: lab: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: laundry: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: avantree_card: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: _downstairs: state: IDLE -> RUNNING
+Jun 06 03:10:26 speakers pulseaudio[11773]: cave: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: wireless: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: downstairs_card: Found underrun 14400 bytes ago (43200 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: avantree_card: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: lab: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: laundry: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: cave: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: downstairs_card: Found underrun 14400 bytes ago (43200 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: lab: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: laundry: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: cave: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: downstairs_card: Found underrun 14400 bytes ago (43200 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: lab: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: laundry: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: cave: Found underrun 4800 bytes ago (14400 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: downstairs_card: Found underrun 14400 bytes ago (43200 bytes ahead in playback buffer)
+Jun 06 03:10:26 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:26 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:26 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:26 speakers pulseaudio[11773]: Implicit underrun of 'ALSA Playback'
+Jun 06 03:10:26 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:26 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:26 speakers shairport-sync[11799]:          0.073371224 "player.c:2146" Player: packets out of sequence: expected: 59857, got: 59879, with ab_read: 59880 and ab_write: 60102.
+Jun 06 03:10:26 speakers shairport-sync[11799]:          0.026265062 "player.c:2285" Large negative sync error: -6521 with should_be_frame_32 of 2746557688, nt of 2746478116 and current_delay of 2107.
+Jun 06 03:10:26 speakers shairport-sync[11799]:          0.000794846 "player.c:2300" Play a silence of 6521 frames.
+Jun 06 03:10:26 speakers shairport-sync[11799]:          0.077188456 "player.c:2146" Player: packets out of sequence: expected: 59883, got: 59892, with ab_read: 59893 and ab_write: 60113.
+Jun 06 03:10:26 speakers shairport-sync[11799]:          0.121093612 "player.c:2273" Large positive sync error: 2740.
+Jun 06 03:10:26 speakers shairport-sync[11799]:          0.133406195 "player.c:2146" Player: packets out of sequence: expected: 59908, got: 59924, with ab_read: 59925 and ab_write: 60148.
+Jun 06 03:10:26 speakers shairport-sync[11799]:          0.041214838 "player.c:2273" Large positive sync error: 2831.
+Jun 06 03:10:27 speakers shairport-sync[11799]:          0.138138894 "player.c:2146" Player: packets out of sequence: expected: 59929, got: 59946, with ab_read: 59947 and ab_write: 60170.
+Jun 06 03:10:27 speakers pulseaudio[11773]: Implicit underrun of 'ALSA Playback'
+Jun 06 03:10:27 speakers shairport-sync[11799]:          0.757427895 "audio_alsa.c:1674" alsa: underrun while writing 353 samples to alsa device.
+Jun 06 03:10:27 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:27 speakers pulseaudio[11773]: Sink update requested latency 100.00
+Jun 06 03:10:27 speakers pulseaudio[11773]: _downstairs: state: RUNNING -> IDLE
+Jun 06 03:10:27 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:27 speakers pulseaudio[11773]: Freeing input 181 "ALSA Playback"
+Jun 06 03:10:27 speakers pulseaudio[11773]: Not setting device for stream ALSA Playback, because already set.
+Jun 06 03:10:27 speakers pulseaudio[11773]: Negotiated format: pcm, format.sample_format = "\"s32le\""  format.rate = "44100"  format.channels = "2"  format.channel_map = "\"front-left,front-right\""
+Jun 06 03:10:27 speakers pulseaudio[11773]: Trying to change sample spec
+Jun 06 03:10:27 speakers pulseaudio[11773]: Sink _downstairs becomes busy, resuming.
+Jun 06 03:10:27 speakers pulseaudio[11773]: Sink _downstairs becomes idle, timeout in 60 seconds.
+Jun 06 03:10:27 speakers pulseaudio[11773]: Resampler:
+Jun 06 03:10:27 speakers pulseaudio[11773]:   rate 44100 -> 48000 (method speex-float-10)
+Jun 06 03:10:27 speakers pulseaudio[11773]:   format s32le -> s16le (intermediate float32le)
+Jun 06 03:10:27 speakers pulseaudio[11773]:   channels 2 -> 2 (resampling 2)
+Jun 06 03:10:27 speakers pulseaudio[11773]: Choosing speex quality setting 10.
+Jun 06 03:10:27 speakers pulseaudio[11773]: memblockq requested: maxlength=33554432, tlength=0, base=4, prebuf=0, minreq=1 maxrewind=0
+Jun 06 03:10:27 speakers pulseaudio[11773]: memblockq sanitized: maxlength=33554432, tlength=33554432, base=4, prebuf=0, minreq=4 maxrewind=0
+Jun 06 03:10:27 speakers pulseaudio[11773]: Created input 182 "ALSA Playback" on _downstairs with sample spec s32le 2ch 44100Hz and channel map front-left,front-right
+Jun 06 03:10:27 speakers pulseaudio[11773]:     media.name = "ALSA Playback"
+Jun 06 03:10:27 speakers pulseaudio[11773]:     application.name = "ALSA plug-in [shairport-sync]"
+Jun 06 03:10:27 speakers pulseaudio[11773]:     native-protocol.peer = "UNIX socket client"
+Jun 06 03:10:27 speakers pulseaudio[11773]:     native-protocol.version = "33"
+Jun 06 03:10:27 speakers pulseaudio[11773]:     application.process.id = "11799"
+Jun 06 03:10:27 speakers pulseaudio[11773]:     application.process.user = "shairport-sync"
+Jun 06 03:10:27 speakers pulseaudio[11773]:     application.process.host = "speakers"
+Jun 06 03:10:27 speakers pulseaudio[11773]:     application.process.binary = "shairport-sync"
+Jun 06 03:10:27 speakers pulseaudio[11773]:     application.language = "C"
+Jun 06 03:10:27 speakers pulseaudio[11773]:     application.process.machine_id = "6f25fe73523b462c903f2c486e612f38"
+Jun 06 03:10:27 speakers pulseaudio[11773]: Requested tlength=11888.62 ms, minreq=11.61 ms
+Jun 06 03:10:27 speakers pulseaudio[11773]: Early requests mode enabled, configuring sink latency to minreq.
+Jun 06 03:10:27 speakers shairport-sync[11799]:          0.020665605 "player.c:2285" Large negative sync error: -7004 with should_be_frame_32 of 2746614574, nt of 2746534436 and current_delay of 1058.
+Jun 06 03:10:27 speakers pulseaudio[11773]: Could not configure a sufficiently low latency. Early requests might not be satisfied.
+Jun 06 03:10:27 speakers shairport-sync[11799]:          0.001285618 "player.c:2300" Play a silence of 7004 frames.
+Jun 06 03:10:27 speakers pulseaudio[11773]: Requested latency=11.61 ms, Received latency=100.00 ms
+Jun 06 03:10:27 speakers pulseaudio[11773]: memblockq requested: maxlength=4194304, tlength=4194304, base=8, prebuf=4096, minreq=4096 maxrewind=0
+Jun 06 03:10:27 speakers pulseaudio[11773]: memblockq sanitized: maxlength=4194304, tlength=4194304, base=8, prebuf=4096, minreq=4096 maxrewind=0
+Jun 06 03:10:27 speakers pulseaudio[11773]: Final latency 11988.62 ms = 11865.40 ms + 2*11.61 ms + 100.00 ms
+Jun 06 03:10:27 speakers pulseaudio[11773]: Sink update requested latency 100.00
+Jun 06 03:10:27 speakers pulseaudio[11773]: wireless: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: avantree_card: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: wireless: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: lab: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: avantree_card: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: laundry: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: cave: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: downstairs_card: Found underrun 5760 bytes ago (51840 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: lab: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: laundry: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: cave: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: downstairs_card: Found underrun 5760 bytes ago (51840 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: lab: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: laundry: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: cave: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: downstairs_card: Found underrun 5760 bytes ago (51840 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: lab: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: laundry: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: cave: Found underrun 1920 bytes ago (17280 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: downstairs_card: Found underrun 5760 bytes ago (51840 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: lab: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: laundry: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: cave: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: downstairs_card: Found underrun 8640 bytes ago (48960 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: _downstairs: state: IDLE -> RUNNING
+Jun 06 03:10:27 speakers pulseaudio[11773]: wireless: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: avantree_card: Found underrun 2880 bytes ago (16320 bytes ahead in playback buffer)
+Jun 06 03:10:27 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:27 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:27 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.
+Jun 06 03:10:27 speakers pulseaudio[11773]: Requesting rewind due to end of underrun.

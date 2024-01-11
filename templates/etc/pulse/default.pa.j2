@@ -17,9 +17,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with PulseAudio; if not, see <http://www.gnu.org/licenses/>.
 
-# This startup script is used only if PulseAudio is started per-user
-# (i.e. not in system mode)
-
 .fail
 
 ### Automatically augment property information from .desktop files
@@ -40,7 +37,7 @@ load-module module-augment-properties
 load-module module-alsa-sink device={{card.name}} tsched=0
 {% endif %}
 {% if audio.backend == "pulse" %}
-load-module module-alsa-card device_id={{card.name}} card_name=alsa_card.{{card.name}} rate={{audio.sample_rate}} sink_name={{card.name}} tsched=0
+load-module module-alsa-card device_id={{card.name}} card_name=alsa_card.{{card.name}} {% if audio.sample_rate is defined %} rate={{ audio.sample_rate }} {% endif %} sink_name={{card.name}} tsched=0
 set-card-profile alsa_card.{{card.name}} {{card.profile}}
 {% endif %}
 {% endfor %}
@@ -59,14 +56,14 @@ set-card-profile alsa_card.{{card.name}} {{card.profile}}
 {% for card in audio.cards %}
 {% for output in card.outputs %}
 {% if audio.backend == "alsa" %}
-load-module module-remap-sink sink_name={{output}} sink_properties="device.description='{{output}}'" remix=no master=alsa_output.{{card.name}} channels=2 channel_map=front-left,front-right master_channel_map={{
+load-module module-remap-sink sink_name={{output}} sink_properties="device.description='{{output}}'" remix=no master=alsa_output.{{card.name}} channels=2 {% if audio.sample_rate is defined %} rate={{ audio.sample_rate }} {% endif %} channel_map=front-left,front-right master_channel_map={{
 ['front-left','front-right','rear-left','rear-right','front-center','lfe','side-left','side-right'][loop.index0 * 2]}},{{['front-left','front-right','rear-left','rear-right','front-center','lfe','side-left','side-right'][loop.index0 * 2 + 1]}}
 {% if card == audio.cards[0] and output == audio.cards[0].outputs[0] %}
 set-default-sink {{audio.cards[0].outputs[0]}}
 {% endif %}
 {% endif %}
 {% if audio.backend == "pulse" %}
-load-module module-remap-sink sink_name={{output}} sink_properties="device.description='{{output}}'" remix=no master={{card.name}} channels=2 channel_map=front-left,front-right master_channel_map={{
+load-module module-remap-sink sink_name={{output}} sink_properties="device.description='{{output}}'" remix=no master={{card.name}} channels=2 {% if audio.sample_rate is defined %} rate={{ audio.sample_rate }} {% endif %} channel_map=front-left,front-right master_channel_map={{
 ['front-left','front-right','rear-left','rear-right','front-center','lfe','side-left','side-right'][loop.index0 * 2]}},{{['front-left','front-right','rear-left','rear-right','front-center','lfe','side-left','side-right'][loop.index0 * 2 + 1]}}
 {% if card == audio.cards[0] and output == audio.cards[0].outputs[0] %}
 set-default-sink {{audio.cards[0].outputs[0]}}
@@ -77,7 +74,8 @@ set-default-sink {{audio.cards[0].outputs[0]}}
 
 # create virtual sinks that direct to more than one actual sink
 {% for output in audio.virtual_outputs %}
-load-module module-combine-sink sink_name="{{ output.name }}" sink_properties="device.description='{{output.name}} ({{output.combining | join(" + ")}})'" slaves="{{ output.combining | join(",") }}" channels=2
+load-module module-combine-sink sink_name="{{ output.name }}" sink_properties="device.description='{{output.name}} ({{output.combining | join(" + ")}})'" slaves="{{ output.combining | join(",") }}" channels=2 {% if output.flags is defined %}{% for key, value in (output.flags).items() %}{{key}}={{value}}{% endfor %}{% endif %}
+
 {% endfor %}
 
 ### Automatically connect sink and source if JACK server is present
@@ -100,25 +98,6 @@ load-module module-bluetooth-discover
 {{ c.command }} {{ c.name }} {{ c.args }}
 {% endfor %}
 
-### Load the RTP sender module (also configured via paprefs, see above)
-#load-module module-null-sink sink_name=rtp format=s16be channels=2 rate=44100 sink_properties="device.description='RTP Multicast Sink'"
-#load-module module-rtp-send source=rtp.monitor
-
-### Load additional modules from GSettings. This can be configured with the paprefs tool.
-### Please keep in mind that the modules configured by paprefs might conflict with manually
-### loaded modules.
-.ifexists module-gsettings.so
-.nofail
-load-module module-gsettings
-.fail
-.endif
-
-### Automatically restore the default sink/source when changed by the user
-### during runtime
-### NOTE: This should be loaded as early as possible so that subsequent modules
-### that look up the default sink/source get the right value
-# load-module module-default-device-restore
-
 ### Make sure we always have a sink around, even if it is a null sink.
 load-module module-always-sink
 
@@ -126,7 +105,7 @@ load-module module-always-sink
 load-module module-intended-roles
 
 ### Automatically suspend sinks/sources that become idle for too long
-# load-module module-suspend-on-idle
+load-module module-suspend-on-idle timeout=60
 
 ### If autoexit on idle is enabled we want to make sure we only quit
 ### when no local session needs us anymore.
@@ -141,7 +120,7 @@ load-module module-systemd-login
 load-module module-position-event-sounds
 
 ### Cork music/video streams when a phone stream is active
-load-module module-role-cork
+# load-module module-role-cork
 
 ### Block audio recording for snap confined packages unless they have
 ### the "pulseaudio" or "audio-record" interfaces plugged.

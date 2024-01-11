@@ -2,17 +2,30 @@
 audio: {}
 
 audio_defaults:
+  role: "server"     # server component...
   bluetooth_rx: no   # support acting like a bluetooth speaker
   bluetooth_tx: no   # support transmitting to bluetooth speakers
-  airplay: yes       # support acting as several Airplay receivers
+  airplay: yes       # act as several Airplay receivers
   dlna: yes          # act as several DLNA receivers
-  sample_rate: 48000
+  sample_rate: 44100 # might leave undefined and see happens by default
   backend: "pulse"   # what userspace lib gets to talk to the card.
   pulse_splits: no   # when the backend is not pulse, does Pulse send
                      # separate streams for each virtual output (yes) or
                      # does Pulse make a multichannel stream for each
                      # card (no)
-  airplay_lowest_port: 5000
+
+  # starting_ip: 100 # should explicitly set it
+  # interface: "{{ansible_default_ipv4.interface}}" #TODO: key off this in docker-compose
+
+  shairport_sync_conf:
+    general:
+      output_backend: pa
+      interpolation: basic
+      resync_threshold_in_seconds: 0
+      audio_backend_buffer_desired_length_in_seconds: 0.35
+    pa: {}
+    diagnostics:
+      log_verbosity: 1
 
   pulse_daemon_conf:
     exit-idle-time: -1
@@ -21,25 +34,25 @@ audio_defaults:
     realtime-scheduling: no
     realtime-priority: 50
     flat-volumes: no
-    resample-method: speex-float-10
+    resample-method: trivial
     deferred-volume-safety-margin-usec: 10
+    log-target: auto
+    log-level: notice
 
   pulse_default_pa:
     - command: load-module
-      name: "module-raop-sink"
-      server: "garage"
-      args: ""
-    - command: load-module
-      name: "module-native-protocol-tcp"
-      args: "auth-ip-acl=127.0.0.1;10.0.0.0/24;192.168.0.0/24 auth-anonymous=1"
+      name: "module-native-protocol-tcp"  #port 4713
+      args: "auth-ip-acl=127.0.0.1;10.0.0.0/8;192.168.0.0/16;172.16.0.0/16 auth-anonymous=1"
     - command: load-module
       name: "module-native-protocol-unix"
-      args: "auth-group=audio socket=/tmp/pulse-server"
+      # specifying the socket file here seems to have no effect,
+      # /etc/systemd/system/pulseaudio.socket actually seems to control it.
+      args: "auth-anonymous=1 socket=/tmp/pulseaudio.socket"
     - command: load-module
       name: "module-zeroconf-publish"
       args: ""
     - command: load-module
-      name: "module-http-protocol-tcp"
+      name: "module-http-protocol-tcp" # port 4714
       args: ""
     - command: load-module
       name: "module-cli-protocol-tcp"
@@ -56,5 +69,5 @@ audio_defaults:
       
   pulse_client_conf:
     autospawn: "no"
-    default-server: "unix:/tmp/pulse-server"
+    default-server: "unix:/tmp/pulseaudio.socket"
     enable-memfd: "yes"

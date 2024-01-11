@@ -1,21 +1,40 @@
+---
 
+# these values will be combined with those in roles/crowding.audio/defaults/main.yml
 audio_cfg:
+  role: "server"
   bluetooth_rx: yes
   bluetooth_pw: 1234
+  dlna: no
+  
   backend: "pulse"
   pulse_daemon_conf:
     realtime-scheduling: yes
 
+  # shairport will run in one IP for each instance, using macvlan driver;
+  # this is the starting value and you should ensure the
+  # block doesn't collide with addresses assigned by your router. 
+  # in your router's config.
+  starting_ip: 10
+  # It is relative to your network (i.e. if your host is at 192.168.69.42/22,
+  # a value of 100 means the virtual servers will have IP adresses starting at
+  # 192.168.68.100, since your /22 subnet starts at 192.168.68.0.
+
+  # the network device to use. Must support promicuous mode for macvlan.
+  interface: "eth0"
+  
+  # Cards are specified by device path, which is the only way to distinguish
+  # otherwise identical cards.
   # devpath can be discovered by `udevadm info -e | grep sound`
-  # the first output named in this section is used as "default"
+  # the first output named in this section will be the default output.
   cards:
     - name: downstairs_card                      # name to assign to card
       devpath: '?*/8-1:1.0/sound/card?*' # pattern to match udev path
       profile: "output:analog-surround-51" # tells Pulse how many channels to use
-      outputs:
+      outputs: # each output allocates two channels
         - lab
-        - laundry
-        - cave
+        - garage
+        - piano
     - name: upstairs_card
       devpath: '?*/6-1:1.0/sound/card?*'
       profile: "output:analog-surround-71"
@@ -23,7 +42,6 @@ audio_cfg:
         - living_room
         - kitchen
         - office
-        - bedroom
     - name: avantree_card
       devpath: "?*/4-1.2:1.0/sound/card?"
       profile: "output:analog-stereo"
@@ -33,7 +51,13 @@ audio_cfg:
   virtual_outputs:
     - name: "_upstairs"
       combining: [kitchen, office, living_room]
+      flags:
+        adjust_time: 0 # same card, so adjustment unnecessary
     - name: "_downstairs"
-      combining: [lab, laundry, cave, wireless]
+      combining: [lab, garage, piano] #wireless
+      flags:
+        adjust_time: 0 # same card, so adjustment unnecessary
     - name: "_everywhere"
-      combining: [living_room, kitchen, office, lab, laundry, cave, wireless]
+      combining: [_upstairs, _downstairs] #wireless
+      flags:
+        resample_method: trivial #for syncing, nearest neighbor should be fine?

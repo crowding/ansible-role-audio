@@ -1,5 +1,5 @@
 [Unit]
-Description=ShairportSync AirTunes receiver on %i
+Description=ShairportSync AirTunes receiver on {{sink.0}}
 Documentation=man:shairport-sync(7)
 Documentation=file:///usr/share/doc/shairport-sync/README.md.gz
 Documentation=https://github.com/mikebrady/shairport-sync
@@ -8,21 +8,24 @@ Requires=pulseaudio.service
 After=pulseaudio.service
 Requires=avahi-daemon.service
 After=avahi-daemon.service
+{% if sink.1 != "" %}
+After=shairport-sync_{{sink.1}}.service
+{% endif %}
 PartOf=shairport-sync.target
 
 [Service]
 Type=simple
 Restart=on-failure
 EnvironmentFile=-/etc/default/shairport-sync
-ExecStartPre=-/usr/bin/docker container stop shairport-sync_%i
-ExecStart=/usr/bin/docker container start -a shairport-sync_%i
-ExecStartPost=/bin/sleep 10
-ExecStop=/usr/bin/docker stop shairport-sync_%i 
+ExecStartPre=-/usr/bin/docker container stop shairport-sync_{{sink.0}}
+ExecStartPre=/bin/sleep 15
+ExecStart=/usr/bin/docker container start -a shairport-sync_{{sink.0}}
+ExecStop=/usr/bin/docker stop shairport-sync_{{sink.0}} 
 User={{ansible_user}}
 Group=audio
 
-# not sure the point to this if Dockerized.
-{%if audio.pulse_daemon_conf['realtime-scheduling'] %}
+# not sure if this does anything if Dockerized
+{% if audio.pulse_daemon_conf['realtime-scheduling'] %}
 # LimitRTPRIO=95
 # LimitRTTIME=500000
 LimitNICE=-19

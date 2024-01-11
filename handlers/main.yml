@@ -1,5 +1,8 @@
 - name: restart avahi-daemon
-  service: name=avahi-daemon state=restarted
+  become: yes
+  systemd:
+    name=avahi-daemon
+    state=restarted
 - name: "reload udev rules"
   become: yes
   command: udevadm control --reload-rules
@@ -13,6 +16,7 @@
   systemd:
     name: "shairport-sync.target"
     state: stopped
+  ignore_errors: true
   listen: "reload systemd"
 - name: "restart bluetooth"
   become: yes
@@ -45,15 +49,23 @@
   listen:
     - "stop pulseaudio"
     - "restart pulseaudio"
-    - "reload alsa"
     - "reload systemd"
-- name: "restart pulseaudio daemon"
+- name: "restart pulseaudio client"
   systemd:
     name: pulseaudio
     enabled: yes
+    state: restarted
+    # might only work when logged in, see note in ansible systemd manpage
+    scope: user
+  listen: "restart pulseaudio client"
+- name: "restart pulseaudio daemon"
+  become: true
+  systemd:
+    name: "pulseaudio.service"
+    enabled: yes
+    state: restarted
   listen:
     - "restart pulseaudio"
-    - "reload alsa"
     - "reload systemd"
 - name: "start shairport"
   become: yes
@@ -72,3 +84,7 @@
     state: restarted
   listen:
     - "restart gmrender"
+    - "restart shairport"
+    - "restart pulseaudio"
+    - "reload systemd"
+    - "reload alsa"

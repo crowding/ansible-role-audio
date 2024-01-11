@@ -1,0 +1,10 @@
+- name: windows clients config
+  include_tasks:
+    file: client_win.yml
+  when: ansible_os_family == "Windows"
+
+- name: debian client config
+  include_tasks:
+    file: client_deb.yml
+  when: ansible_os_family == "Debian"
+  

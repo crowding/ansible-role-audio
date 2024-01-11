@@ -1,0 +1,18 @@
+{% for group_key, group_val in audio.shairport_sync_conf.items() %}
+{{group_key}} = {
+{% if group_key == "general" %}
+   name = "{{sink}}";
+{% endif %}
+{% if group_key == "pa" %}
+   sink = "{{sink}}"
+   application_name = "Shairport-sync for {{sink}}";
+{% endif %}
+{% for key, val in group_val.items() %}
+{% if key | regex_search("^[-0-9.]*$") %}
+   {{key}} = {{val}};
+{% else %}
+   {{key}} = {{val | tojson}};
+{% endif %}
+{% endfor %}
+};
+{% endfor %}

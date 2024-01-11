@@ -1,10 +1,22 @@
-- name: install packages
+---
+
+- name: install Docker and ansible control
+  tags: packages
   become: yes
-  apt: 
-    name:
-    - shairport-sync
-    state: present
+  block:
+    - apt: name=docker.io state=present
+    - apt: name=docker-compose-v2 state=present
+    - apt: name=python3-pip state=present
+    - apt: name=shairport-sync state=absent
+    - pip: executable=pip3 extra_args=--upgrade name=docker state=present
+- name: pull image
+  tags: packages
+  become: yes
+  community.general.docker_image:
+    name: "mikebrady/shairport-sync:latest"
+    source: pull
 - name: "disable single shairport service"
+  tags: prep
   become: yes
   ignore_errors: yes
   systemd:
@@ -12,6 +24,7 @@
     state: stopped
     enabled: no
 - name: remove user service entries
+  tags: prep
   become: yes
   file:
     path: "{{item}}"
@@ -19,9 +32,48 @@
   loop:
     - "/usr/lib/systemd/system/shairport-sync.service"
     - "/etc/init.d/shairport-sync"
+    - "/etc/shairport-sync.conf"
   notify: "reload systemd"
-- name: make shairport systemd worker
+
+- name: get list of sinks
+  set_fact:
+    airplay_sinks:  |-
+      [ {% for card in audio.cards %}
+        {% for output in card.outputs %}
+        {{output}},
+        {% endfor %}
+        {% endfor %}
+        {% for output in audio.virtual_outputs %}
+        {{output.name}}, 
+        {% endfor %}
+      ]
+- set_fact:
+    airplay_sinks: "{{airplay_sinks | from_yaml}}"
+- name: make config dir
+  file:
+    path: /etc/shairport-sync
+    state: directory
   become: yes
+- name: write shairport config file for each sink
+  become: yes
+  template:
+    src: "etc/shairport-sync/shairport-sync.conf.j2"
+    dest: "/etc/shairport-sync/shairport-sync_{{sink}}.conf"
+  loop: "{{ airplay_sinks }}"
+  loop_control:
+    loop_var: "sink"
+- name: write docker compose file for shairport
+  become: yes
+  template:
+    src: "etc/shairport-sync/docker-compose.yaml.j2"
+    dest: "/etc/shairport-sync/docker-compose.yaml"
+- name: compose containers
+  become: yes
+  shell: "docker compose up --no-start"
+  args:
+    chdir: "/etc/shairport-sync"
+- name: make systemd target
+  become: yes 
   template:
     src: "{{item}}.j2"
     dest: "/{{item}}"
@@ -29,13 +81,14 @@
     - "reload systemd"
     - "restart shairport"
   with_items:
-    - "etc/systemd/system/shairport-sync@.service"
     - "etc/systemd/system/shairport-sync.target"
     - "etc/default/shairport-sync"
-- name: allow shairport to talk to pulse
-  become: yes
-  user:
-    name: "shairport-sync"
-    groups:
-      - "pulse-access"
-      - "audio"
+- name: make systemd workers, enforcing startup sequence 
+  become: true
+  template:
+    src: "etc/systemd/system/shairport-sync_endpoint.service.j2"
+    dest: "/etc/systemd/system/shairport-sync_{{sink.0}}.service"
+  loop: "{{ airplay_sinks | zip([''] + airplay_sinks[:-1]) }}"
+  loop_control:
+    loop_var: "sink"
+  notify: "reload systemd"

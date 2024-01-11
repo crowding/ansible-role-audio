@@ -6,18 +6,8 @@
 # installed at /etc/default/shairport-sync by the maintainer scripts
 
 # Additional options that are passed to the Daemon.
-DAEMON_ARGS="-o alsa -a {{ audio.cards[0].outputs[0] }} -p {{ audio.airplay_lowest_port }} -- -d {{ audio.cards[0].outputs[0] }}"
-{% set port = namespace(value=audio.airplay_lowest_port) %}
-{% for card in audio.cards %}
-{% for sink in card.outputs %}
-DAEMON_ARGS_{{sink}}="-o alsa -a {{ sink }} -p {{ port.value }} -- -d {{ sink }}"
-{% set port.value = port.value + 1 %}
-{% endfor %}
-{% endfor %}
-{% for sink in audio.virtual_outputs %}
-DAEMON_ARGS_{{sink.name}}="-o alsa -a {{ sink.name }} -p {{ port.value }} -- -d {{ sink.name }}"
-{% set port.value = port.value + 1 %}
-{% endfor %}
+
+
 # NOTICE: Please do *not* include the "-d" or "--daemon" options in DAEMON_ARGS
 # above. This option will be added automatically as necessary. Please also note
 # that most options are configurable using /etc/shairport-sync.conf.

@@ -1,0 +1,12 @@
+# Not sure best way to stream from windows to pulse.
+# can cast media with 
+---
+
+# - name: install pulseaudio
+#   win_chocolatey:
+#     name: pulseaudio
+#     state: present
+# - name: install jack
+#   win_chocolatey:
+#     name: jack
+#     state: present

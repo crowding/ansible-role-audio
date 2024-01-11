@@ -1,0 +1,38 @@
+# This file is managed by Ansible.
+---
+
+version: "2.1"
+
+{% set ipaddr = namespace(value=audio.starting_ip) %}
+services:
+{% for sink in airplay_sinks | from_yaml %}
+  {{sink}}:
+    hostname: airplay-{{sink}}
+    container_name: shairport-sync_{{sink}}
+    image: mikebrady/shairport-sync:latest
+    restart: unless-stopped
+    networks:
+      spsnet_shared:
+      spsnet:
+        ipv4_address: {{ ansible_default_ipv4.network | ansible.netcommon.ipmath(ipaddr.value) }}
+    volumes:
+      - ./shairport-sync_{{sink}}.conf:/etc/shairport-sync.conf
+      - /tmp/pulseaudio.socket:/tmp/pulseaudio.socket
+      - /etc/pulse/client.conf:/etc/pulse/client.conf
+{% set ipaddr.value = ipaddr.value + 1 %}        
+{% endfor %}
+
+networks:
+  spsnet:
+    name: spsnet
+    driver: macvlan
+    driver_opts:
+      parent: {{ansible_default_ipv4.interface}}
+    ipam:
+      config:
+        - subnet: "{{ (ansible_default_ipv4.network + '/' + ansible_default_ipv4.netmask) | ipaddr('net') }}"
+          gateway: "{{ansible_default_ipv4.gateway}}"
+
+  spsnet_shared:
+    name: spsnet_shared
+    driver: bridge

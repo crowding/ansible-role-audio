@@ -1,5 +1,13 @@
 # Linux Audio setup / Troubleshooting
 
+## NOTE
+
+The following describes a manual setup/troubleshooting process; I
+actually implement my audio setup via Ansible; so any time this talks
+about adding packages or writing things to config files, that's
+implemented in the Ansible role. This file details some of the
+troubleshooting I did on the way to a having that config.
+
 ## Goals
 
 I want to be able to stream music from any mobile device (laptop,
@@ -41,9 +49,12 @@ For these instructions I am running on Armbian Wheezy install.
     The Ethernet adapter sits on the USB bus, which further constrains
     bandwidth. And newer Raspberry Pi devices have continued to put
     the ethernet adapter on USB.
-* [One 7-port USB 2.0 hub][dlink]. This was initially required because of
-  the Raspi's USB shenanigans (i.e. use a proper active hub to better while
-  the Raspberry Pi offers three or four USB ports,
+* [One 7-port USB 2.0 hub][dlink]. This was initially required because
+  of the Raspi's USB shenanigans (it actually has only one USB
+  tranceiver connected to a PASSIVE hub! So communicating with a
+  USB1.1 device on one port eats all the time slices that could be
+  used communicating with faster devices. An active hub
+  will do rate conversion which helps with this.)
 * A few USB audio DACs. I have a few Griffin iMics, which have the
   interesting property that they clock themselves off the USB port
   rather than an internal clock -- this means you can run more than
@@ -69,8 +80,7 @@ these ARM boxes.) It looks like my armbian install has:
 Might I want to upgrade this to a mainline 4.x kernel? Or, wait,
 they're on 5.x now. It's been a while since I touched this project.
 
-Started over with a fresh Debian install -- with I was able to
-install Debian on a 2GB microSD card.
+Started over with a fresh Armbian install.
 
 This install seems to be using my native resolutions just fine (on the
 console, haven't tried with Xwindows yet.)
@@ -79,13 +89,13 @@ console, haven't tried with Xwindows yet.)
 
 This time I'll be using Ansible to make this setup reproducible.
 
-I have Windows, Mac and Linux devices on my home network, wo the solution should.
-Here's a short list of network sound protocols:
+I have Windows, Mac and Linux devices on my home network, so the
+solution should have connectivity to all.  Here's a short list of
+network sound protocols:
 
 * Airplay is native on Mac and iOS devices
-* PulseAudio is standard on Linux
-* JACK, another Linux option aimed at more technically
-  exacting setups
+* PulseAudio is standard on Linux aimed at general desktop usage
+* JACK, another Linux option more aimed at music production setups
 * Miracast? DLNA? What does Android use for network audio?
 * Bluetooth
 
@@ -170,7 +180,6 @@ like,
 `/devices/platform/soc/1c1c000.usb/usb4/4-1/4-1.4/4-1.4:1.0/sound/card4`,
 where the 'cardN' is dynamically assigned. 
 
-
 Using this information, you can now write a file named something like
 `/etc/udev/rules.d/39-audio.rules` which would look something like
 this (here with one 5.1-channel and one 7.1-channel USB adapters that both look
@@ -203,28 +212,19 @@ which might be more convenient, if you don't have devices with identical
 chipsets.
 
 I actually generate this file from Ansible via a [template][],
-generated from the corresponding [hostvars file][] where I collect information
-about the setup in one place.
+generated from the corresponding [hostvars file][] where I collect
+information about the setup in one place.
 
-[template]: ~/.ansible/templates/audio_udev_rules.j2
-[hostvars file]: ~/.ansible/host_vars/speakers.local.yaml
+[template]: templates/audio_udev_rules.j2
+[hostvars file]: example_setup/host_vars/speakers.local.yaml
 
-After writing the rules file, apply the rules using 
+After writing the rules file, apply the rules using:
 
     udevadm control --reload-rules && udevadm trigger
 
 then reconnect your devices. Then you should be able to see the names
 in the output of `aplay -l` as well as in the directory
 `/proc/asound/` and `pacmd list-cards`.
-
-## Testing
-
-Playing from the command line to a specific device:
-
-```
-mpg123 -o alsa -a lab avril.mp3
-mpg123 -o alsa -a lab avril_14th.mp3
-```
 
 ## Configuring virtual devices in asound.conf
 
@@ -307,6 +307,14 @@ ctl.laundry { type hw; card surround5 }
 Writing the asound.conf gets quite repetitive so I plan to
 template it out from Ansible.
 
+## Testing ALSA playback
+
+Playing from the command line to a specific device. Here we're playing to a virtual device named "lab"
+
+```
+mpg123 -o alsa -a lab avril_14th.mp3
+```
+
 ### <a name="multiple"></a>Playing simultaneously to multiple outputs using ALSA (but see below)
 
 ALSA has the ability to gang virtual devices together, but I won't be
@@ -362,9 +370,9 @@ more CPU overhead.
 
 ### Relaying to Pulse
 
-Instead, we relay the output from ALSA to PulseAudio, (which will send
-its data back to ALSA, in the present configuration, but that's
-neither here nor there. Do this using the alsa pulse plugin, for example:
+Instead, we relay the output from libalsa to PulseAudio, (which will
+send its data back to kernel ALSA drivers, but that's neither here nor
+there.) Do this using the alsa pulse plugin, for example:
 
     pcm.everywhere { type pulse; device "everywhere" }
     ctl.everywhere { type pulse; device "everywhere" }
@@ -385,17 +393,17 @@ But based on [this blog entry][blog] (by one of the authors of PulseAudio), I
 think that it matches my use case better than JACK. So I might try again.
 [blog]: http://0pointer.de/blog/projects/when-pa-and-when-not.html
 
-List your audio devices with ``pacmd list-cards``.
+List your audio devices with `pacmd list-cards`.
 
 This told me that all the cards I'd named and configured in ALSA
 configs didn't carry over -- they have some complicated USB path name
-that that gained from scanning `/ Noe, when I do a `pacmd list-cards`
+that that gained from scanning `/proc` Noe, when I do a `pacmd list-cards`
 it sees both the ALSA hardware cards, but it doesn't see the virtual
 plugs. I thin I will recapitulate those in pulseaudio land anyway. But
 more worrisome is, it doesn't see the card names that I set in udev
 rules?
 
-### Directing Pulse to use ALSA-lib
+### Directing Pulse to use ALSA-lib to detect cards
 
 It looks like by default, pulseaudio interprets the contents of udev
 by its own rules to make sound cards. This is controlled in
@@ -450,7 +458,7 @@ kernel directly.
 
 To play to a Pulse output:
 
-    mpg123 -o pulse -a alsa_card.surround7 avril.mp3
+    mpg123 -o pulse -a alsa_card.surround7 avril_14th.mp3
 
 ## Splitting outputs
 
@@ -464,7 +472,7 @@ and redirects it to the
 
 Test with:
 
-    mpg123 -o pulse -a laundry avril.mp3
+    mpg123 -o pulse -a laundry avril_14th.mp3
 
 ### My outputs are getting redirected to the default!
 
@@ -550,7 +558,7 @@ start pulseaudio as a daemon:
     User=pulse
     Group=audio
 
-### system mode is unnecessary
+### system mode is unnecessary?
 
 Now, PulseAudio has a setting called [system mode][], which requires
 you to start the server as root in multi-user audio setups. And there
@@ -637,7 +645,7 @@ the problem.
 When running pulse as user rather than systemd, running mpg123, it
 doesn't do this?
 
-Next suspect is realtime. What if I disable realtims in pulse daemon,
+Next suspect is realtime. What if I disable realtime in pulse daemon,
 still running from systemd? Nope.
 
 Logs show:
@@ -649,10 +657,48 @@ disable idle exit (which I saw no need for bc headless server) and
 instead that made it reboot itself several times while it was supposed
 to be negotiating a connection.
 
+Nope, still get many reboots running from systemd and using
+mpg123. How can I monitor what systemd is doing?
 
-Nope, still get many reboots running from systemd and using mpg123. How can I monitor what systemd is doing?
+### Pulseaudio running from systemd: Pacmd: "No PulseAudio daemon running"
 
-Also I 
+Running `pacmd list-sinks` fails with `No PulseAudio daemon running, or not running as session daemon.`
+
+I'm getting this error when running `pacmd` (either as root or as a
+user in the `audio` group.). It's nonsense because I am successfully
+playing audio through Pulse!
+
+It turns out that this is a permissions issue? Because when I `sudo -u
+pulse pacmd list-cards` it works. But when do a plain "sudo" it
+doesn't! A search turns up this [hint][]:
+
+> One disadvantage of this arrangement is the commands pacmd and pactl will no longer work when run as your user. Both rely on the user dbus session instead of the socket for communicating with the pulseaudio daemon.
+[hint]: https://gist.github.com/Earnestly/4acc782087c0a9d9db58
+
+So it seems I'll just have to use `sudo` for this (and probably run
+the web UI under the same user?)
+
+### Enable verbose logging
+
+To enable verbose logging, run `sudo -u pulse pacmd set-log-level 4`
+
+To follow logs use:
+
+    sudo journalctl -f | grep '\(pulseaudio\|shairport\)'
+
+## Sinking system audio from Windows?
+
+## Exposing a web UI?
+
+## Auto switch on and off amplifiers?
+
+A class D amp like the famous Lepai can be left on constantly while
+wasting little energy.  Some of my other amps have a bigger quiescent
+power draw, though, so it would be nice to power them on and off
+automatically.
+
+I have a Home Assistant install on this same machine, and a Zigbee
+controller running from
 
 ## Acting as a Bluetooth sink
 
@@ -681,7 +727,7 @@ But then the connection broke, and would not reconnect.
 
 ### Always discoverable
 
-Permanently turn on discoverability by editing `/etc/bluetooth/main.conf`. and setting
+Permanently turn on discoverability by editing `/etc/bluetooth/main.conf`. and setting...
 
 ### [TODO] Multiple virtual devices?
 
@@ -896,10 +942,51 @@ because the service is running as the "shairport-sync" user while the
 daemon is running as my login user. It needs to have permissions to
 talk to pulseaudio as that user. [See above][#permissions].
 
+### can't play multiple streams?
+
+Play mpg123 to one output, then in a separate process play it to
+another. Why is it stuttering? If I use the mpg123's pulse output
+instead of libalsa, it even crashes pulseaudio for that channel,
+yay. What's going on?
+
+## play via PulseAudio on Linux
+
+I want to play from another Linux desktop. How do I get PulseAudio
+sinks to appear in my laptop's control panel? Or for that matter how
+to play to an RAOP sink?
+
+Server already has the `load-module module-zeroconf-publish` checked.
+Are the services discoverable? `avahi-discover` shows that there is a
+pulseaudio server `pulse@speakers`.
+
+I installed `paprefs` on the client but the checkboxes for network
+access are grayed off. Is that really a 12 year old issue?
+
+So how do I make my own pulseaudio instance see it as an option?
+`/etc/pulse/default.pa` exists. I should copy it to `~/.config/pulse`
+
+```
+cp /etc/pulse/default.pa .config/pulse/default.pa
+```
+
+I then uncommented the lines:
+
+```
+load-module module-esound-protocol-tcp
+load-module module-native-protocol-tcp
+load-module module-zeroconf-discover
+load-module module-raop-discover
+load-module module-null-sink sink_name=rtp format=s16be channels=2 rate=44100 sink_properties="device.description='RTP Multicast Sink'"
+load-module module-rtp-send source=rtp.monitor
+```
+
+then `pulseaudio -k` Did this restart? where's the log? Actually that worked great, I now se 
 
 ## DLNA/uPNP rendering
 
-`[gmrender-resurrect][]` is a DLNA renderer for Unix. Install following [these instructions][] and [also these][]
+`[gmrender-resurrect][]` is a DLNA renderer for Unix. Install
+following [these instructions][] and [also these][]
+
 [gmrender-resurrect]: https://github.com/hzeller/gmrender-resurrect/
 [these instructions]: http://blog.scphillips.com/posts/2014/05/playing-music-on-a-raspberry-pi-using-upnp-and-dlna-v3/
 [also these]: https://rootprompt.apatsch.net/2013/03/07/raspberry-pi-network-audio-player-pulseaudio-dlna-and-bluetooth-a2dp-part-2-dlna/
@@ -1109,3 +1196,279 @@ relevant settings are documented on [this page][exec].
     LimitRTTIME=500000
     LimitNICE=-19
 
+
+### Stuttering when starting an airplay stream
+
+This happens for a few seconds while starting an audio stream.
+when playing from my phone, not when playing from my
+laptop. Are there any logs from shairport-sync? I enable logging in
+`etc/shairport-sync`:
+
+    log_verbosity = 3; // "0" means no debug verbosity, "3" is most verbose.
+
+and then trace the logging with:
+
+    sudo journalctl -f | grep '\(pulseaudio\|shairport\)'
+
+It seems to be starting and stopping streams constantly. due to a momentary underrun.
+
+What happens if I change shairport-sync's output to pulseaudio?
+
+Same thing, but something suggestive in the logs:
+
+    Jun 06 03:39:33 speakers pulseaudio[11773]: Requesting rewind due to corking
+
+Disabling the "corking" module from seems to make for a bit less stutter.
+
+Oddly enough, this "corking" doesn't appear in the logs when shairport
+is using the alsa backend, but the improvement still holds. However,
+shairport also seems to work worse with the pa backend.
+
+This seems to be tied to shairport-sync's sync functionality. I'm not
+relying on that (PulseAudio should handle syncing its outputs) so I
+will disable that. Indeed, this reduces the problem to a single gap
+instead of an endless loop of them.
+
+### Reduce cpu load?
+
+The gaps are probably coming from CPU load. If two streams are playing
+there are more gaps. It might be useful to play with the buffer
+size/number in pulseaudio and see how that affects things.
+
+When playing one stream, pulseaudio is registering 60-70% of a core and
+shairport-sync is registering 15%. This is a bit much, I wonder if it
+has to do with resampling?
+
+Most media I'm playing will be 44.1 kHz. But I have the output set to
+48000 right now? Or not because Pulseaudio is the backend right now.
+Let's change that.
+
+Hmm setting it to 44100 didn't reduce the CPU usage. Setting resample
+methods to "trivial" reduced usage to 30%. Why is it resampling
+though?
+
+Maybe if I disable the useless Avantree card? That takes Pulse down to
+about 20% cpu.
+
+How about if I disable output syncing?
+
+## shairport-sync is not starting
+
+After working on the Linux-client setup, I can now see pulse endpoints
+from Linux but have stopped being able to see them from my
+iphone.
+`shairport-sync` services are not appearing in `sudo service --status-all`,
+But they _are_ showing as running in the output of `systemctl`.
+But they do _not_ show up in `avahi-discover`.
+
+```
+peter@speakers:~$ systemctl status -l shairport-sync@_downstairs
+...
+Nov 13 07:51:10 speakers shairport-sync[31467]: Line 28 of the configuration file "/etc/shairport-sync.conf":
+Nov 13 07:51:10 speakers shairport-sync[31467]: duplicate setting name
+Nov 13 07:51:12 speakers systemd[1]: Stopping ShairportSync AirTunes receiver on _downstairs...
+```
+
+Okay, so this was due to a duplicate key for `_resync_threshold_in_seconds.`
+
+## constant gaps, positive and negative sync errors:
+
+But now I am having constant gaps in playback. Repeated errors of the form:
+
+```
+0.028415756 "player.c:2273" Large positive sync error: 8669.
+0.196357677 "audio_alsa.c:1674" alsa: underrun while writing 352 samples to alsa device.
+0.071517245 "player.c:2146" Player: packets out of sequence: expected: 42344, got: 42377, with ab_read: 42378 and ab_write: 42605.
+0.023106624 "player.c:2285" Large negative sync error: -8113 with should_be_frame_32 of 1786841005, nt of 1786761617 and current_delay of 699.
+0.000974963 "player.c:2300" Play a silence of 8113 frames.
+0.079398696 "player.c:2146" Player: packets out of sequence: expected: 42381, got: 42390, with ab_read: 42391 and ab_write: 42620.
+0.097913703 "player.c:2273" Large positive sync error: 3063.
+0.145762471 "player.c:2146" Player: packets out of sequence: expected: 42403, got: 42420, with ab_read: 42421 and ab_write: 42649.
+0.023240869 "player.c:2273" Large positive sync error: 6416.
+0.167959879 "audio_alsa.c:1674" alsa: underrun while writing 352 samples to alsa device.
+0.055789092 "player.c:2146" Player: packets out of sequence: expected: 42424, got: 42451, with ab_read: 42452 and ab_write: 42681.
+0.020607760 "player.c:2285" Large negative sync error: -6137 with should_be_frame_32 of 1786867095, nt of 1786787665 and current_delay of 2633.
+0.001723476 "player.c:2300" Play a silence of 6137 frames.
+```
+
+So there are both negative and positive sync errors. I tried increasing `drift_tolerance_in_seconds = 0.002` and it appears to have gone away? But it also went away when I undid that change.
+
+Ah, the problem was this:
+
+    resync_threshold_in_seconds = "0";
+
+It should not have the quotation marks.
+
+    resync_threshold_in_seconds = 0;
+
+Go figure!
+
+## Too many airplay targets in my audio controls
+
+Pulseaudio lists all the airplay targets under ipv4 addresses and then again under ipv6 addresses. How can I make it show less?
+
+I changed `/etc/avahi/avahi-daemon.conf` to have:
+
+    [server]
+    use-ipv4=yes
+    use-ipv6=no
+
+So far so good.
+
+## Suddenly stops producing audio, though client thinks it is playing
+
+This is fixed by disconnecting and then reconnecting. What is going on? This happens when playing via 
+
+## After an hour or two of playtime, we start getting dropouts.
+
+This is the only relevant message at the current log level...
+
+    Nov 22 05:58:13 speakers shairport-sync[11225]:          9.120892469 "audio_alsa.c:1674" alsa: underrun while writing 351 samples to alsa device.
+
+## I unplugged and replugged my system and now it won't start
+
+I suspect the problem is I don't have things plugged into the sae port different port somehow?
+
+Doing `udevadm monitor` and pluggin/unplugging cards shows the addresses
+
+downstairs:
+
+    KERNEL[4910018.788755] add      /devices/platform/soc/1c1d400.usb/usb8/8-1/8-1:1.0/sound/card1 (sound)
+
+upstairs:
+
+    KERNEL[4910382.380398] add      /devices/platform/soc/1c1b400.usb/usb6/6-1/6-1:1.0/sound/card2 (sound)
+
+bluetooth:
+
+    UDEV  [4910457.628054] add      /devices/platform/soc/1c1c000.usb/usb4/4-1/4-1.3/4-1.3:1.0/sound/card3 (sound)
+
+That's different from what I had in udevadm rules. I just plugged it back into the right port. 
+
+## can't play from Linux / pulase any more?
+
+It's been s while since I touched the setup.
+
+I needed a command to read logs... 
+
+     sudo journalctl -f "_SYSTEMD_SLICE=system-shairport\x2dsync.slice" + _SYSTEMD_UNIT=pulseaudio.service
+     
+ I also want to increase pulseaudio and shairport's logging level
+ 
+ So I re-run my ansible playbook. It fails with 
+ 
+    Dec 26 00:46:32 speakers pulseaudio[13671]: Module "module-zeroconf-publish" should be loaded once at most. Refusing to load.
+    Dec 26 00:46:32 speakers pulseaudio[13671]: Failed to parse module arguments
+    Dec 26 00:46:32 speakers pulseaudio[13671]: Failed to load module "module-native-protocol-tcp" (argument: "auth-ip-acl=127.0.0.1;10.0.0.0/24;192.168.0.0/24 auth-anonymous=1 # port 4713"): initialization failed.
+    Dec 26 00:46:32 speakers pulseaudio[13671]: Failed to parse module arguments
+    Dec 26 00:46:32 speakers pulseaudio[13671]: Failed to load module "module-http-protocol-tcp" (argument: "# port 4714"): initialization failed.
+
+This points to some duplicated lines in `/etc/pulse/default.pa`.
+
+Now to follow the logs on the client side:
+
+    journalctl --user -f "_SYSTEMD_USER_UNIT=pulseaudio.service"
+
+it seems that shairport is accepting the connection and pretending that nothing is wrong. Pulseaudio however isn't logging enough messages on either client or server.
+
+Strange that sound goes right through from iOS but not from Linux.
+
+So to change the log verbosity, I can go to `/etc/pulse/daemon.conf` and add 
+
+    log-level = debug
+    
+on both client and server. Now, after restarting bothe client and server I find that pulseaudio is behaving like somethign is connecting and sending audio.
+
+I will compare server logs between Pulse client and ios client.I didn't come up with much. Pulseaudio logs on the client side have the message
+
+    "Unexpected response when expecting header: RTSP/1.0 200 OK"
+    
+Which has one google hit, from a person also experiencing this, with no answers.
+
+So the problem may be with my client computer's shairport implementation. I'm on version 3.3.5 of shairport-sync and github is on version 4.3 so why wasn't that upgraded? Looks like 3.3.5 is the version in Ubuntu. It's now packaged as a Docker image, because it's 2023 and no one make packages for distributions anymore.
+
+So, here we go 
+
+# Dockerizing shairport-sync
+
+Just changed shairport-sync to "docker run shairport-sync" in `/etc/systemd/system/shairport-sync@.service.` Startign service now gives this error:
+
+    Dec 26 07:19:53 speakers docker[28375]: docker: permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Post "http://%2Fvar%2Frun%2Fdo>
+
+Think this is because user shairport-sync was not in group "docker." Fixed, then:
+
+    Unable to find image 'shairport-sync:latest' locally
+    
+starting an unmodified image always seems to require the full path. Then I am getting these logs:
+
+    Dec 26 08:47:15 speakers docker[3289]: fatal error: unable to listen on port 319. The error is: "Address in use". NQPTP must run as root to access this port. Or is another PTP daemon -- possibly another instance on NQPTP -- running already?
+
+Odd since I thought I was passing the port number on the command line. Can I reproduce this on the command line?
+
+    docker run -ti --network host --device /dev/snd --name shairport-sync_living_room mikebrady/shairport-sync -o alsa -a living_room -p 5003
+    
+    docker run -d --network host --device /dev/snd --name shairport-sync_living_room mikebrady/shairport-sync -o alsa -a living_room -p 5003
+    
+Gives me a
+
+    The container name "/shairport-sync_living_room" is already in use by container ...
+    
+So I can `docker container prune` to remove stopped containers.
+
+The name collision issue means I should be creating my containers ahead of time. So one container per shairport instance. Which gives me an idea, can the arguments be encoded into the container?
+
+Also it is giving me 
+
+    Loading service file /etc/avahi/services/sftp-ssh.service.
+    Loading service file /etc/avahi/services/ssh.service.
+    *** WARNING: Detected another IPv4 mDNS stack running on this host. This makes mDNS unreliable and is thus not recommended. ***
+    bind() failed: Address in use
+    Failed to create IPv4 socket, proceeding in IPv6 only mode
+
+How do I address this issue with ipv4?
+
+More importantly, the container appears on my iPhone, accepts connection and playback, but no sound is coming out. What do pulseaudio logs say?
+
+Okay, on my raspi I don't see anything in syslog at all. Still claims to be playing.
+
+Can I see the container logs?
+
+`docker logs shairport-sync_living_room` shows the startup messages but not the syslog?
+
+Here, this page has a tute for multiple instances
+
+https://github.com/noelhibbard/shairport-sync-docker
+
+I don't follow why the static IP addresses... Is there a way to use DHCP on the virtual hosts?
+
+    fatal error: unable to listen on port 319. The error is: "Address in use". NQPTP must run as root to access this port. Or is another PTP daemon -- possibly another instance on NQPTP -- running already?
+    
+So it seems like this image also runs its own instance of NQPTP and avahi-daemon.... which I suppose is why noelhibbard's compose file assigned it to a different IP address.
+
+So my setup is to template out a docker-compose file that assigns one IP to each endpoint.
+
+I can ping them but I can't connect to the given ports.. Did the daemon start?
+
+    docker exec -it shairport-sync_lab /bin/sh
+    
+I don't see a shairport-sync process. On further inspection it seems like the container went up but the shairport-sync process exited early.
+
+### Where exactly is the Pulse socket???
+
+Okay, I tried exec'ing shairport manually in one of the images and saw that it was not connecting to the socket. I see my pulseaudio is making a socket at `/tmp/pulse-server` even though it's configured with `socket=/tmp/pulseaudio.socket` My host pulseaudio instance creates a socket at `/tmp/pulse-server` even though it has
+    
+    load-module module-native-protocol-unix auth-anonymous=1 socket=/tmp/pulseaudio.socket
+
+This appears to be because the socket created in `/etc/systemd/system/pulseaudio.socket` overrides the conf file (how?). So change it in systemd. `systemd daemon-reloaad`.
+
+### Containers deadlock when started as a group
+
+Now, I have a situation where `docker compose up` doesn't seem to be running shairport-sync?. But `docker start shairport-sync_living_room` does make it start and it shows up on the network. And it plays! So cool.
+
+So now to make them all run at once `docker container start` didn't do it?
+
+On further inspection, all the containers start and function if I start them one at a time. But when brought up as a group together, they get stuck in init, while bringing up nqptp or dbus. 
+
+It seems likely that there is some resource contention happening as these services announce themselves to each other, something is timing out or deadlocking.
+
+For the moment, rather than debugging the Docker image, I decided to work around it in systemd. Each endpoint gets an `execStartPre=/bin/sleep 5` and an `After=` to enforce starting in order. SO each are started one at a time.
